@@ -1,0 +1,285 @@
+{
+  "poles": [
+    { "id": "direction", "nom": "Direction", "couleur": "#c0455a", "prop": "tableau" },
+    { "id": "qualite", "nom": "Qualité", "couleur": "#3b82c4", "prop": "ecran" },
+    { "id": "atelier", "nom": "Atelier Agents", "couleur": "#2aa6a6", "prop": "robot" },
+    { "id": "build", "nom": "Build et Maintenance", "couleur": "#e4572e", "prop": "serveur" },
+    { "id": "docs", "nom": "Docs et Exploration", "couleur": "#8e6bbf", "prop": "biblio" },
+    { "id": "reseau", "nom": "Réseau et Infra", "couleur": "#6d8aa8", "prop": "baie" },
+    { "id": "tests", "nom": "Tests", "couleur": "#43a047", "prop": "banc" },
+    { "id": "oss", "nom": "Open Source", "couleur": "#a98467", "prop": "cartons" },
+    { "id": "croissance", "nom": "Croissance", "couleur": "#f06292", "prop": "affiche" },
+    { "id": "revue", "nom": "Open-space Revue", "couleur": "#5c6bc0", "prop": "drapeau", "openSpace": true },
+    { "id": "build-os", "nom": "Open-space Build", "couleur": "#f2a541", "prop": "drapeau", "openSpace": true }
+  ],
+  "agents": {
+    "planner": {
+      "prenom": "Pauline", "pole": "direction",
+      "role": "Planifie les fonctionnalités complexes et les refontes avant qu'on écrive du code.",
+      "competences": ["Découpage d'une demande en étapes ordonnées", "Repérage des dépendances et des risques", "Plans de refonte par phases"],
+      "quand": "Dès qu'une fonctionnalité ou une refonte dépasse quelques fichiers."
+    },
+    "architect": {
+      "prenom": "Armand", "pole": "direction",
+      "role": "Conçoit l'architecture système et tranche les grands choix techniques.",
+      "competences": ["Conception de systèmes et montée en charge", "Arbitrages techniques argumentés", "Lecture critique d'une architecture existante"],
+      "quand": "Avant une nouvelle fonctionnalité structurante ou une grosse refonte."
+    },
+    "code-architect": {
+      "prenom": "Clara", "pole": "direction",
+      "role": "Dessine le plan d'implémentation d'une fonctionnalité en respectant les conventions du code existant.",
+      "competences": ["Analyse des motifs et conventions du dépôt", "Liste des fichiers et interfaces à créer", "Flux de données et ordre de construction"],
+      "quand": "Quand la fonctionnalité est décidée et qu'il faut un plan concret, fichier par fichier."
+    },
+    "chief-of-staff": {
+      "prenom": "Charles", "pole": "direction",
+      "role": "Trie les messages (mail, Slack, LINE, Messenger) et prépare les réponses.",
+      "competences": ["Classement des messages en 4 niveaux d'urgence", "Brouillons de réponse", "Suivi après envoi"],
+      "quand": "Pour gérer un flux de communication sur plusieurs canaux."
+    },
+    "code-reviewer": {
+      "prenom": "Rémi", "pole": "qualite",
+      "role": "Relit chaque changement de code : qualité, sécurité, maintenabilité.",
+      "competences": ["Relecture systématique des diffs", "Détection des défauts de qualité et de sécurité", "Remarques classées par gravité"],
+      "quand": "Juste après avoir écrit ou modifié du code."
+    },
+    "security-reviewer": {
+      "prenom": "Salomé", "pole": "qualite",
+      "role": "Détecte les vulnérabilités et propose leur correction.",
+      "competences": ["Secrets en clair, injections, SSRF", "Cryptographie mal employée", "Vulnérabilités du Top 10 OWASP"],
+      "quand": "Après tout code qui touche aux entrées utilisateur, à l'authentification, aux API ou aux données sensibles."
+    },
+    "database-reviewer": {
+      "prenom": "Dalila", "pole": "qualite",
+      "role": "Spécialiste PostgreSQL : requêtes, schémas, sécurité et performance.",
+      "competences": ["Optimisation de requêtes", "Conception de schémas et migrations", "Bonnes pratiques Supabase"],
+      "quand": "En écrivant du SQL, une migration, un schéma, ou face à une base lente."
+    },
+    "silent-failure-hunter": {
+      "prenom": "Silas", "pole": "qualite",
+      "role": "Traque les échecs silencieux dans le code.",
+      "competences": ["Erreurs avalées", "Valeurs de repli trompeuses", "Erreurs non propagées"],
+      "quand": "Quand le code semble marcher mais qu'on doute de sa gestion des erreurs."
+    },
+    "type-design-analyzer": {
+      "prenom": "Théo", "pole": "qualite",
+      "role": "Évalue la conception des types.",
+      "competences": ["Encapsulation", "Invariants exprimés par les types", "Utilité et application réelle des contraintes"],
+      "quand": "En introduisant ou en remaniant des types importants."
+    },
+    "comment-analyzer": {
+      "prenom": "Colette", "pole": "qualite",
+      "role": "Vérifie que les commentaires disent vrai et servent à quelque chose.",
+      "competences": ["Exactitude des commentaires", "Complétude et maintenabilité", "Risque de commentaires périmés"],
+      "quand": "Avant de fusionner un code très commenté ou documenté."
+    },
+    "commit-reviewer": {
+      "prenom": "Côme", "pole": "qualite",
+      "role": "Relit le diff indexé et rédige un message de commit conforme aux habitudes du dépôt.",
+      "competences": ["Format Conventional Commits", "Respect de l'historique du dépôt", "Relecture du diff avant commit"],
+      "quand": "Juste avant de committer."
+    },
+    "a11y-architect": {
+      "prenom": "Alix", "pole": "qualite",
+      "role": "Garantit l'accessibilité des interfaces web et natives.",
+      "competences": ["Conformité WCAG 2.2", "Conception de composants et de systèmes de design inclusifs", "Audit d'accessibilité du code"],
+      "quand": "En concevant des composants d'interface ou en auditant une interface existante."
+    },
+    "build-error-resolver": {
+      "prenom": "Bruno", "pole": "build",
+      "role": "Répare les erreurs de build et de typage TypeScript au plus vite.",
+      "competences": ["Erreurs de build et de types", "Diffs minimaux", "Aucune modification d'architecture"],
+      "quand": "Dès que le build casse ou qu'une erreur de type apparaît."
+    },
+    "refactor-cleaner": {
+      "prenom": "Renée", "pole": "build",
+      "role": "Supprime le code mort et regroupe les doublons.",
+      "competences": ["Outils d'analyse knip, depcheck, ts-prune", "Suppression sûre du code inutilisé", "Consolidation des doublons"],
+      "quand": "Pour faire le ménage dans un dépôt qui a grossi."
+    },
+    "code-simplifier": {
+      "prenom": "Simone", "pole": "build",
+      "role": "Simplifie le code récent sans changer son comportement.",
+      "competences": ["Clarté et cohérence", "Maintenabilité", "Comportement préservé"],
+      "quand": "Après une session de code, avant la relecture."
+    },
+    "performance-optimizer": {
+      "prenom": "Perrine", "pole": "build",
+      "role": "Trouve les goulets d'étranglement et accélère le code.",
+      "competences": ["Profilage et fuites mémoire", "Taille des bundles et rendu", "Améliorations algorithmiques"],
+      "quand": "Quand une page, une requête ou un traitement est trop lent."
+    },
+    "tdd-guide": {
+      "prenom": "Thaïs", "pole": "tests",
+      "role": "Fait écrire les tests avant le code.",
+      "competences": ["Méthode tests d'abord", "Objectif de 80 % de couverture", "Accompagnement des correctifs et des refontes"],
+      "quand": "Avant d'écrire une fonctionnalité, de corriger un bug ou de refactorer."
+    },
+    "e2e-runner": {
+      "prenom": "Émile", "pole": "tests",
+      "role": "Écrit, maintient et exécute les tests de bout en bout.",
+      "competences": ["Vercel Agent Browser, Playwright en repli", "Mise en quarantaine des tests instables", "Captures, vidéos et traces"],
+      "quand": "Pour vérifier qu'un parcours utilisateur critique fonctionne."
+    },
+    "pr-test-analyzer": {
+      "prenom": "Prosper", "pole": "tests",
+      "role": "Évalue la qualité de la couverture de tests d'une pull request.",
+      "competences": ["Couverture des comportements, pas des lignes", "Cas limites oubliés", "Tests qui préviennent de vrais bugs"],
+      "quand": "Pendant la relecture d'une pull request."
+    },
+    "doc-updater": {
+      "prenom": "Dorothée", "pole": "docs",
+      "role": "Tient à jour la documentation et les cartes du code.",
+      "competences": ["Génération de docs/CODEMAPS", "Mise à jour des README et des guides", "Commandes /update-codemaps et /update-docs"],
+      "quand": "Après un changement qui rend la documentation fausse."
+    },
+    "docs-lookup": {
+      "prenom": "Lucien", "pole": "docs",
+      "role": "Va chercher la documentation à jour d'une bibliothèque et répond avec des exemples.",
+      "competences": ["Recherche via Context7", "Exemples de code actuels", "Questions d'installation et d'API"],
+      "quand": "Pour savoir comment utiliser une bibliothèque, un framework ou une API."
+    },
+    "code-explorer": {
+      "prenom": "Éloi", "pole": "docs",
+      "role": "Retrace le fonctionnement d'une fonctionnalité existante.",
+      "competences": ["Suivi des chemins d'exécution", "Cartographie des couches", "Inventaire des dépendances"],
+      "quand": "Avant de modifier un code qu'on ne connaît pas."
+    },
+    "spec-miner": {
+      "prenom": "Séraphine", "pole": "docs",
+      "role": "Extrait des spécifications de comportement d'un code existant, au format OpenSpec.",
+      "competences": ["Exigences et invariants structurés", "Ancrage sur les tests existants", "Fonctionne sans préparation préalable"],
+      "quand": "Pour faire entrer un projet existant dans une démarche guidée par les spécifications."
+    },
+    "agent-evaluator": {
+      "prenom": "Agathe", "pole": "atelier",
+      "role": "Note le travail d'un agent sur une grille à 5 axes.",
+      "competences": ["Exactitude, complétude, clarté", "Caractère actionnable, concision", "Fiche de score avec preuves et pistes d'amélioration"],
+      "quand": "Après une tâche non triviale dont on veut évaluer la qualité."
+    },
+    "harness-optimizer": {
+      "prenom": "Hector", "pole": "atelier",
+      "role": "Améliore la fiabilité et le coût de la configuration du harnais d'agents.",
+      "competences": ["Évaluations chiffrées (pass@k)", "Réglage de la configuration locale", "Réduction des coûts"],
+      "quand": "Quand les agents sont peu fiables ou trop chers."
+    },
+    "loop-operator": {
+      "prenom": "Louise", "pole": "atelier",
+      "role": "Pilote les boucles d'agents autonomes.",
+      "competences": ["Suivi de l'avancement", "Détection des boucles qui calent", "Intervention sans casse"],
+      "quand": "Pendant une boucle autonome longue."
+    },
+    "conversation-analyzer": {
+      "prenom": "Constance", "pole": "atelier",
+      "role": "Analyse les transcripts pour repérer les comportements à empêcher par des hooks.",
+      "competences": ["Lecture des conversations passées", "Repérage des erreurs récurrentes", "Propositions de hooks"],
+      "quand": "Avec /hookify lancé sans argument."
+    },
+    "gan-planner": {
+      "prenom": "Gaspard", "pole": "atelier",
+      "role": "Transforme une idée d'une ligne en spécification produit complète.",
+      "competences": ["Fonctionnalités et sprints", "Critères d'évaluation", "Direction de design"],
+      "quand": "Au départ d'un cycle planificateur, générateur, évaluateur."
+    },
+    "gan-generator": {
+      "prenom": "Gisèle", "pole": "atelier",
+      "role": "Implémente la spécification et itère sur les retours de l'évaluateur.",
+      "competences": ["Implémentation des fonctionnalités", "Prise en compte des retours", "Itération jusqu'au seuil de qualité"],
+      "quand": "Après le planificateur, à chaque tour de la boucle."
+    },
+    "gan-evaluator": {
+      "prenom": "Gabin", "pole": "atelier",
+      "role": "Teste l'application en marche et la note selon la grille.",
+      "competences": ["Tests dans le navigateur avec Playwright", "Notation selon la grille", "Retours actionnables au générateur"],
+      "quand": "Après chaque livraison du générateur."
+    },
+    "network-architect": {
+      "prenom": "Nadia", "pole": "reseau",
+      "role": "Conçoit l'architecture réseau d'une entreprise ou de plusieurs sites.",
+      "competences": ["Conception à partir des besoins", "Routage et validation", "Automatisation et dépannage"],
+      "quand": "Pour concevoir ou faire évoluer un réseau d'entreprise."
+    },
+    "network-config-reviewer": {
+      "prenom": "Nestor", "pole": "reseau",
+      "role": "Relit les configurations de routeurs et de switchs.",
+      "competences": ["Sécurité et exactitude", "Références périmées", "Commandes risquées en fenêtre de changement"],
+      "quand": "Avant d'appliquer une configuration réseau."
+    },
+    "network-troubleshooter": {
+      "prenom": "Noé", "pole": "reseau",
+      "role": "Diagnostique les pannes réseau couche par couche, en lecture seule.",
+      "competences": ["Connectivité, routage, DNS", "Interfaces et règles de filtrage", "Cause racine étayée par des preuves"],
+      "quand": "Quand quelque chose ne passe plus sur le réseau."
+    },
+    "homelab-architect": {
+      "prenom": "Hippolyte", "pole": "reseau",
+      "role": "Conçoit le réseau d'une maison ou d'un petit labo.",
+      "competences": ["Plan à partir du matériel disponible", "Changements par étapes sûres", "Consignes de retour arrière"],
+      "quand": "Pour monter ou réorganiser un réseau domestique."
+    },
+    "opensource-forker": {
+      "prenom": "Fanny", "pole": "oss",
+      "role": "Copie un projet pour l'ouvrir au public et en retire ce qui doit rester privé.",
+      "competences": ["Retrait des secrets et identifiants", "Remplacement des références internes", "Génération de .env.example, historique git nettoyé"],
+      "quand": "Première étape de la mise en open source d'un projet."
+    },
+    "opensource-sanitizer": {
+      "prenom": "Sacha", "pole": "oss",
+      "role": "Vérifie qu'un projet est entièrement nettoyé avant publication.",
+      "competences": ["Recherche de secrets et de données personnelles", "Références internes et fichiers dangereux", "Rapport réussite, échec ou réserves"],
+      "quand": "Deuxième étape, avant toute publication."
+    },
+    "opensource-packager": {
+      "prenom": "Paco", "pole": "oss",
+      "role": "Produit l'emballage open source complet d'un projet nettoyé.",
+      "competences": ["README, licence, guide de contribution", "CLAUDE.md et script d'installation", "Modèles de tickets GitHub"],
+      "quand": "Troisième étape, une fois le projet nettoyé."
+    },
+    "marketing-agent": {
+      "prenom": "Margaux", "pole": "croissance",
+      "role": "Stratège marketing et rédactrice de campagnes.",
+      "competences": ["Étude d'audience et positionnement", "Pages d'atterrissage, e-mails, publicités, posts", "Calendriers de contenu"],
+      "quand": "Pour préparer ou exécuter un lancement de produit ou une campagne."
+    },
+    "seo-specialist": {
+      "prenom": "Selim", "pole": "croissance",
+      "role": "Spécialiste du référencement naturel.",
+      "competences": ["Audit SEO technique", "Données structurées et Core Web Vitals", "Correspondance contenus et mots-clés"],
+      "quand": "Pour auditer un site ou corriger ses balises, son sitemap ou son robots.txt."
+    },
+
+    "typescript-reviewer": { "prenom": "Tristan", "pole": "revue", "specialite": "TypeScript et JavaScript", "focus": ["Sûreté des types", "Justesse du code asynchrone", "Sécurité Node et web"] },
+    "python-reviewer": { "prenom": "Pia", "pole": "revue", "specialite": "Python", "focus": ["Conformité PEP 8 et idiomes Python", "Annotations de types", "Sécurité et performance"] },
+    "go-reviewer": { "prenom": "Gaëlle", "pole": "revue", "specialite": "Go", "focus": ["Go idiomatique", "Concurrence", "Gestion des erreurs"] },
+    "rust-reviewer": { "prenom": "Roxane", "pole": "revue", "specialite": "Rust", "focus": ["Possession et durées de vie", "Usage de unsafe", "Gestion des erreurs"] },
+    "java-reviewer": { "prenom": "Jules", "pole": "revue", "specialite": "Java (Spring Boot, Quarkus)", "focus": ["Architecture en couches", "JPA, Panache, MongoDB", "Sécurité et concurrence"] },
+    "kotlin-reviewer": { "prenom": "Kenza", "pole": "revue", "specialite": "Kotlin, Android et KMP", "focus": ["Sûreté des coroutines", "Bonnes pratiques Compose", "Architecture propre"] },
+    "swift-reviewer": { "prenom": "Swann", "pole": "revue", "specialite": "Swift", "focus": ["Conception orientée protocoles", "Gestion mémoire ARC", "Swift Concurrency"] },
+    "cpp-reviewer": { "prenom": "Cyprien", "pole": "revue", "specialite": "C++", "focus": ["Sûreté mémoire", "C++ moderne", "Concurrence et performance"] },
+    "csharp-reviewer": { "prenom": "Chloé", "pole": "revue", "specialite": "C# et .NET", "focus": ["Conventions .NET et async", "Types référence nullables", "Sécurité et performance"] },
+    "fsharp-reviewer": { "prenom": "Félix", "pole": "revue", "specialite": "F#", "focus": ["Idiomes fonctionnels", "Filtrage par motifs", "Expressions de calcul"] },
+    "php-reviewer": { "prenom": "Philippine", "pole": "revue", "specialite": "PHP", "focus": ["Conformité PSR-12", "Système de types PHP", "Eloquent et sécurité"] },
+    "ruby-reviewer": { "prenom": "Ruben", "pole": "revue", "specialite": "Ruby et Rails", "focus": ["Ruby idiomatique", "Requêtes Active Record sûres", "Qualité RSpec et Minitest"] },
+    "react-reviewer": { "prenom": "Reda", "pole": "revue", "specialite": "React", "focus": ["Justesse des hooks", "Performance de rendu", "Frontière composants serveur et client"] },
+    "vue-reviewer": { "prenom": "Violette", "pole": "revue", "specialite": "Vue", "focus": ["Composition API", "Pièges de réactivité", "Sécurité des templates"] },
+    "flutter-reviewer": { "prenom": "Flora", "pole": "revue", "specialite": "Flutter et Dart", "focus": ["Bonnes pratiques des widgets", "Gestion d'état", "Performance et accessibilité"] },
+    "django-reviewer": { "prenom": "Djamila", "pole": "revue", "specialite": "Django", "focus": ["Justesse de l'ORM", "Motifs DRF", "Sûreté des migrations"] },
+    "fastapi-reviewer": { "prenom": "Fabio", "pole": "revue", "specialite": "FastAPI", "focus": ["Justesse du code asynchrone", "Injection de dépendances et schémas Pydantic", "Qualité OpenAPI"] },
+    "bengali-reviewer": { "prenom": "Bina", "pole": "revue", "specialite": "qui traite du texte bengali", "focus": ["Justesse Unicode et normalisation", "Traitement adapté à l'écriture", "Internationalisation"] },
+    "healthcare-reviewer": { "prenom": "Hélène", "pole": "revue", "specialite": "des logiciels de santé", "focus": ["Sécurité clinique", "Protection des données de santé", "Intégrité des données médicales"] },
+    "mle-reviewer": { "prenom": "Malo", "pole": "revue", "specialite": "de machine learning en production", "focus": ["Contrats de données et pipelines de features", "Reproductibilité de l'entraînement", "Service, supervision et retour arrière"] },
+    "rag-pipeline-reviewer": { "prenom": "Rachel", "pole": "revue", "specialite": "des pipelines RAG", "focus": ["Qualité de la recherche documentaire", "Découpage et choix des embeddings", "Couverture de l'évaluation"] },
+
+    "react-build-resolver": { "prenom": "Rosalie", "pole": "build-os", "specialite": "React", "focus": ["Vite, webpack, Next.js, Parcel, esbuild, Bun", "Erreurs JSX/TSX et d'hydratation", "Frontière composants serveur et client"] },
+    "go-build-resolver": { "prenom": "Gustave", "pole": "build-os", "specialite": "Go", "focus": ["Erreurs de compilation", "Alertes go vet", "Avertissements des linters"] },
+    "rust-build-resolver": { "prenom": "Raphaël", "pole": "build-os", "specialite": "Rust", "focus": ["Erreurs cargo build", "Vérificateur d'emprunts", "Problèmes de Cargo.toml"] },
+    "java-build-resolver": { "prenom": "Jeanne", "pole": "build-os", "specialite": "Java", "focus": ["Maven et Gradle", "Erreurs du compilateur Java", "Correctifs propres à Spring Boot ou Quarkus"] },
+    "kotlin-build-resolver": { "prenom": "Karim", "pole": "build-os", "specialite": "Kotlin", "focus": ["Erreurs du compilateur Kotlin", "Problèmes Gradle", "Dépendances"] },
+    "swift-build-resolver": { "prenom": "Soline", "pole": "build-os", "specialite": "Swift et Xcode", "focus": ["Erreurs swift build et Xcode", "Dépendances SPM", "Signature de code"] },
+    "cpp-build-resolver": { "prenom": "Camille", "pole": "build-os", "specialite": "C++", "focus": ["CMake et compilation", "Erreurs d'édition de liens", "Erreurs de templates"] },
+    "dart-build-resolver": { "prenom": "Darius", "pole": "build-os", "specialite": "Dart et Flutter", "focus": ["Erreurs dart analyze", "Conflits de dépendances pub", "Problèmes build_runner"] },
+    "django-build-resolver": { "prenom": "Daphné", "pole": "build-os", "specialite": "Django", "focus": ["Erreurs pip et Poetry", "Conflits de migrations", "Configuration et collectstatic"] },
+    "pytorch-build-resolver": { "prenom": "Pierre", "pole": "build-os", "specialite": "PyTorch", "focus": ["Formes de tenseurs et erreurs de device", "Gradients et DataLoader", "Précision mixte et CUDA"] },
+    "harmonyos-app-resolver": { "prenom": "Hana", "pole": "build-os", "specialite": "HarmonyOS (ArkTS, ArkUI)", "focus": ["Gestion d'état V2", "Routage Navigation", "Usage des API et performance"] }
+  }
+}

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Quartier Général</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <header id="bar">
+      <h1>Quartier Général</h1>
+      <input id="q" type="search" placeholder="Chercher un prénom, un rôle, un outil" aria-label="Chercher un agent" autocomplete="off" />
+      <span id="count" aria-live="polite"></span>
+      <div id="zoom">
+        <button id="zoom-out" type="button" aria-label="Dézoomer">-</button>
+        <button id="zoom-in" type="button" aria-label="Zoomer">+</button>
+      </div>
+    </header>
+    <nav id="poles" aria-label="Pôles"></nav>
+    <canvas id="office"></canvas>
+    <aside id="fiche" hidden aria-label="Fiche de l'agent"></aside>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

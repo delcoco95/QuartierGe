@@ -1,0 +1,757 @@
+{
+  "version": "2.2.3",
+  "agents": [
+    {
+      "id": "a11y-architect",
+      "description": "Accessibility Architect specializing in WCAG 2.2 compliance for Web and Native platforms. Use PROACTIVELY when designing UI components, establishing design systems, or auditing code for inclusive user experiences.",
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Grep",
+        "Glob"
+      ]
+    },
+    {
+      "id": "agent-evaluator",
+      "description": "Evaluates agent output against 5-axis quality rubric (accuracy, completeness, clarity, actionability, conciseness). Use after any non-trivial task when the user wants a quality assessment, or when the agent-self-evaluation skill is active. Produces structured scorecard with evidence and improvement suggestions.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash"
+      ]
+    },
+    {
+      "id": "architect",
+      "description": "Software architecture specialist for system design, scalability, and technical decision-making. Use PROACTIVELY when planning new features, refactoring large systems, or making architectural decisions.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob"
+      ]
+    },
+    {
+      "id": "bengali-reviewer",
+      "description": "Reviews code handling Bengali (Bangla) text for Unicode correctness, proper normalization, script-aware processing, and internationalization best practices. Use when code processes, displays, or stores Bengali text.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob"
+      ]
+    },
+    {
+      "id": "build-error-resolver",
+      "description": "Build and TypeScript error resolution specialist. Use PROACTIVELY when build fails or type errors occur. Fixes build/type errors only with minimal diffs, no architectural edits. Focuses on getting the build green quickly.",
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Bash",
+        "Grep",
+        "Glob"
+      ]
+    },
+    {
+      "id": "chief-of-staff",
+      "description": "Personal communication chief of staff that triages email, Slack, LINE, and Messenger. Classifies messages into 4 tiers (skip/info_only/meeting_info/action_required), generates draft replies, and enforces post-send follow-through via hooks. Use when managing multi-channel communication workflows.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash",
+        "Edit",
+        "Write"
+      ]
+    },
+    {
+      "id": "code-architect",
+      "description": "Designs feature architectures by analyzing existing codebase patterns and conventions, then providing implementation blueprints with concrete files, interfaces, data flow, and build order.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash"
+      ]
+    },
+    {
+      "id": "code-explorer",
+      "description": "Deeply analyzes existing codebase features by tracing execution paths, mapping architecture layers, and documenting dependencies to inform new development.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob"
+      ]
+    },
+    {
+      "id": "code-reviewer",
+      "description": "Expert code review specialist. Proactively reviews code for quality, security, and maintainability. Use immediately after writing or modifying code. MUST BE USED for all code changes.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash"
+      ]
+    },
+    {
+      "id": "code-simplifier",
+      "description": "Simplifies and refines code for clarity, consistency, and maintainability while preserving behavior. Focus on recently modified code unless instructed otherwise.",
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Bash",
+        "Grep",
+        "Glob"
+      ]
+    },
+    {
+      "id": "comment-analyzer",
+      "description": "Analyze code comments for accuracy, completeness, maintainability, and comment rot risk.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob"
+      ]
+    },
+    {
+      "id": "commit-reviewer",
+      "description": "Reviews a staged diff and drafts a Conventional Commits-compliant message matching the repository's actual history norms. Use before committing, or when asked to write or check a commit message.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash"
+      ]
+    },
+    {
+      "id": "conversation-analyzer",
+      "description": "Use this agent when analyzing conversation transcripts to find behaviors worth preventing with hooks. Triggered by /hookify without arguments.",
+      "tools": [
+        "Read",
+        "Grep"
+      ]
+    },
+    {
+      "id": "cpp-build-resolver",
+      "description": "C++ build, CMake, and compilation error resolution specialist. Fixes build errors, linker issues, and template errors with minimal changes. Use when C++ builds fail.",
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Bash",
+        "Grep",
+        "Glob"
+      ]
+    },
+    {
+      "id": "cpp-reviewer",
+      "description": "Expert C++ code reviewer specializing in memory safety, modern C++ idioms, concurrency, and performance. Use for all C++ code changes. MUST BE USED for C++ projects.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash"
+      ]
+    },
+    {
+      "id": "csharp-reviewer",
+      "description": "Expert C# code reviewer specializing in .NET conventions, async patterns, security, nullable reference types, and performance. Use for all C# code changes. MUST BE USED for C# projects.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash"
+      ]
+    },
+    {
+      "id": "dart-build-resolver",
+      "description": "Dart/Flutter build, analysis, and dependency error resolution specialist. Fixes `dart analyze` errors, Flutter compilation failures, pub dependency conflicts, and build_runner issues with minimal, surgical changes. Use when Dart/Flutter builds fail.",
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Bash",
+        "Grep",
+        "Glob"
+      ]
+    },
+    {
+      "id": "database-reviewer",
+      "description": "PostgreSQL database specialist for query optimization, schema design, security, and performance. Use PROACTIVELY when writing SQL, creating migrations, designing schemas, or troubleshooting database performance. Incorporates Supabase best practices.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash"
+      ]
+    },
+    {
+      "id": "django-build-resolver",
+      "description": "Django/Python build, migration, and dependency error resolution specialist. Fixes pip/Poetry errors, migration conflicts, import errors, Django configuration issues, and collectstatic failures with minimal changes. Use when Django setup or startup fails.",
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Bash",
+        "Grep",
+        "Glob"
+      ]
+    },
+    {
+      "id": "django-reviewer",
+      "description": "Expert Django code reviewer specializing in ORM correctness, DRF patterns, migration safety, security misconfigurations, and production-grade Django practices. Use for all Django code changes. MUST BE USED for Django projects.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash"
+      ]
+    },
+    {
+      "id": "doc-updater",
+      "description": "Documentation and codemap specialist. Use PROACTIVELY for updating codemaps and documentation. Generates docs/CODEMAPS/*, updates READMEs and guides. Backs the /update-codemaps and /update-docs commands.",
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Bash",
+        "Grep",
+        "Glob"
+      ]
+    },
+    {
+      "id": "docs-lookup",
+      "description": "When the user asks how to use a library, framework, or API or needs up-to-date code examples, use Context7 MCP to fetch current documentation and return answers with examples. Invoke for docs/API/setup questions.",
+      "tools": [
+        "Read",
+        "Grep",
+        "mcp__context7__resolve-library-id",
+        "mcp__context7__query-docs"
+      ]
+    },
+    {
+      "id": "e2e-runner",
+      "description": "End-to-end testing specialist using Vercel Agent Browser (preferred) with Playwright fallback. Use PROACTIVELY for generating, maintaining, and running E2E tests. Manages test journeys, quarantines flaky tests, uploads artifacts (screenshots, videos, traces), and ensures critical user flows work.",
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Bash",
+        "Grep",
+        "Glob"
+      ]
+    },
+    {
+      "id": "fastapi-reviewer",
+      "description": "Reviews FastAPI applications for async correctness, dependency injection, Pydantic schemas, security, OpenAPI quality, testing, and production readiness.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash"
+      ]
+    },
+    {
+      "id": "flutter-reviewer",
+      "description": "Flutter and Dart code reviewer. Reviews Flutter code for widget best practices, state management patterns, Dart idioms, performance pitfalls, accessibility, and clean architecture violations. Library-agnostic — works with any state management solution and tooling.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash"
+      ]
+    },
+    {
+      "id": "fsharp-reviewer",
+      "description": "Expert F# code reviewer specializing in functional idioms, type safety, pattern matching, computation expressions, and performance. Use for all F# code changes. MUST BE USED for F# projects.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash"
+      ]
+    },
+    {
+      "id": "gan-evaluator",
+      "description": "GAN Harness — Evaluator agent. Tests the live running application via Playwright, scores against rubric, and provides actionable feedback to the Generator.",
+      "tools": [
+        "Read",
+        "Write",
+        "Bash",
+        "Grep",
+        "Glob",
+        "mcp__playwright__browser_navigate",
+        "mcp__playwright__browser_click",
+        "mcp__playwright__browser_take_screenshot",
+        "mcp__playwright__browser_snapshot",
+        "mcp__playwright__browser_type",
+        "mcp__playwright__browser_fill_form",
+        "mcp__playwright__browser_resize",
+        "mcp__playwright__browser_press_key"
+      ]
+    },
+    {
+      "id": "gan-generator",
+      "description": "GAN Harness — Generator agent. Implements features according to the spec, reads evaluator feedback, and iterates until quality threshold is met.",
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Bash",
+        "Grep",
+        "Glob"
+      ]
+    },
+    {
+      "id": "gan-planner",
+      "description": "GAN Harness — Planner agent. Expands a one-line prompt into a full product specification with features, sprints, evaluation criteria, and design direction.",
+      "tools": [
+        "Read",
+        "Write",
+        "Grep",
+        "Glob"
+      ]
+    },
+    {
+      "id": "go-build-resolver",
+      "description": "Go build, vet, and compilation error resolution specialist. Fixes build errors, go vet issues, and linter warnings with minimal changes. Use when Go builds fail.",
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Bash",
+        "Grep",
+        "Glob"
+      ]
+    },
+    {
+      "id": "go-reviewer",
+      "description": "Expert Go code reviewer specializing in idiomatic Go, concurrency patterns, error handling, and performance. Use for all Go code changes. MUST BE USED for Go projects.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash"
+      ]
+    },
+    {
+      "id": "harmonyos-app-resolver",
+      "description": "HarmonyOS application development expert specializing in ArkTS and ArkUI. Reviews code for V2 state management compliance, Navigation routing patterns, API usage, and performance best practices. Use for HarmonyOS/OpenHarmony projects.",
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Bash",
+        "Grep",
+        "Glob"
+      ]
+    },
+    {
+      "id": "harness-optimizer",
+      "description": "Improve local agent-harness configuration reliability and cost using eval-driven grading (pass@k/pass^k) derived from the eval-harness skill.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash",
+        "Edit"
+      ]
+    },
+    {
+      "id": "healthcare-reviewer",
+      "description": "Reviews healthcare application code for clinical safety, CDSS accuracy, PHI compliance, and medical data integrity. Specialized for EMR/EHR, clinical decision support, and health information systems.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob"
+      ]
+    },
+    {
+      "id": "homelab-architect",
+      "description": "Designs home and small-lab network plans from hardware inventory, goals, and operator experience level, with safe staged changes and rollback guidance.",
+      "tools": [
+        "Read",
+        "Grep"
+      ]
+    },
+    {
+      "id": "java-build-resolver",
+      "description": "Java/Maven/Gradle build, compilation, and dependency error resolution specialist. Automatically detects Spring Boot or Quarkus and applies framework-specific fixes. Fixes build errors, Java compiler errors, and Maven/Gradle issues with minimal changes. Use when Java builds fail.",
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Bash",
+        "Grep",
+        "Glob"
+      ]
+    },
+    {
+      "id": "java-reviewer",
+      "description": "Expert Java code reviewer for Spring Boot and Quarkus projects. Automatically detects the framework and applies the appropriate review rules. Covers layered architecture, JPA/Panache, MongoDB, security, and concurrency. MUST BE USED for all Java code changes.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash"
+      ]
+    },
+    {
+      "id": "kotlin-build-resolver",
+      "description": "Kotlin/Gradle build, compilation, and dependency error resolution specialist. Fixes build errors, Kotlin compiler errors, and Gradle issues with minimal changes. Use when Kotlin builds fail.",
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Bash",
+        "Grep",
+        "Glob"
+      ]
+    },
+    {
+      "id": "kotlin-reviewer",
+      "description": "Kotlin and Android/KMP code reviewer. Reviews Kotlin code for idiomatic patterns, coroutine safety, Compose best practices, clean architecture violations, and common Android pitfalls.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash"
+      ]
+    },
+    {
+      "id": "loop-operator",
+      "description": "Operate autonomous agent loops, monitor progress, and intervene safely when loops stall.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash",
+        "Edit"
+      ]
+    },
+    {
+      "id": "marketing-agent",
+      "description": "Marketing strategist and copywriter for campaign planning, audience research, positioning, copy creation, and content review. Covers landing pages, email sequences, social posts, ad copy, short-form video scripts, and content calendars. Use when the user wants to plan or execute a product launch or marketing campaign.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "WebSearch",
+        "WebFetch"
+      ]
+    },
+    {
+      "id": "mle-reviewer",
+      "description": "Production machine-learning engineering reviewer for data contracts, feature pipelines, training reproducibility, offline/online evaluation, model serving, monitoring, and rollback. Use when ML, MLOps, model training, inference, feature store, or evaluation code changes.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash"
+      ]
+    },
+    {
+      "id": "network-architect",
+      "description": "Designs enterprise or multi-site network architecture from requirements, using existing network skills for focused routing, validation, automation, and troubleshooting detail.",
+      "tools": [
+        "Read",
+        "Grep"
+      ]
+    },
+    {
+      "id": "network-config-reviewer",
+      "description": "Reviews router and switch configurations for security, correctness, stale references, risky change-window commands, and missing operational guardrails.",
+      "tools": [
+        "Read",
+        "Grep"
+      ]
+    },
+    {
+      "id": "network-troubleshooter",
+      "description": "Diagnoses network connectivity, routing, DNS, interface, and policy symptoms with a read-only OSI-layer workflow and evidence-backed root cause summary.",
+      "tools": [
+        "Read",
+        "Bash",
+        "Grep"
+      ]
+    },
+    {
+      "id": "opensource-forker",
+      "description": "Fork any project for open-sourcing. Copies files, strips secrets and credentials (20+ patterns), replaces internal references with placeholders, generates .env.example, and cleans git history. First stage of the opensource-pipeline skill.",
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Bash",
+        "Grep",
+        "Glob"
+      ]
+    },
+    {
+      "id": "opensource-packager",
+      "description": "Generate complete open-source packaging for a sanitized project. Produces CLAUDE.md, setup.sh, README.md, LICENSE, CONTRIBUTING.md, and GitHub issue templates. Makes any repo immediately usable with Claude Code. Third stage of the opensource-pipeline skill.",
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Bash",
+        "Grep",
+        "Glob"
+      ]
+    },
+    {
+      "id": "opensource-sanitizer",
+      "description": "Verify an open-source fork is fully sanitized before release. Scans for leaked secrets, PII, internal references, and dangerous files using 20+ regex patterns. Generates a PASS/FAIL/PASS-WITH-WARNINGS report. Second stage of the opensource-pipeline skill. Use PROACTIVELY before any public release.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash"
+      ]
+    },
+    {
+      "id": "performance-optimizer",
+      "description": "Performance analysis and optimization specialist. Use PROACTIVELY for identifying bottlenecks, optimizing slow code, reducing bundle sizes, and improving runtime performance. Profiling, memory leaks, render optimization, and algorithmic improvements.",
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Bash",
+        "Grep",
+        "Glob"
+      ]
+    },
+    {
+      "id": "php-reviewer",
+      "description": "Expert PHP code reviewer specializing in PSR-12 compliance, PHP type system, Eloquent ORM patterns, security, and performance. Use for all PHP code changes. MUST BE USED for PHP projects.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash"
+      ]
+    },
+    {
+      "id": "planner",
+      "description": "Expert planning specialist for complex features and refactoring. Use PROACTIVELY when users request feature implementation, architectural changes, or complex refactoring. Automatically activated for planning tasks.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob"
+      ]
+    },
+    {
+      "id": "pr-test-analyzer",
+      "description": "Review pull request test coverage quality and completeness, with emphasis on behavioral coverage and real bug prevention.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash"
+      ]
+    },
+    {
+      "id": "python-reviewer",
+      "description": "Expert Python code reviewer specializing in PEP 8 compliance, Pythonic idioms, type hints, security, and performance. Use for all Python code changes. MUST BE USED for Python projects.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash"
+      ]
+    },
+    {
+      "id": "pytorch-build-resolver",
+      "description": "PyTorch runtime, CUDA, and training error resolution specialist. Fixes tensor shape mismatches, device errors, gradient issues, DataLoader problems, and mixed precision failures with minimal changes. Use when PyTorch training or inference crashes.",
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Bash",
+        "Grep",
+        "Glob"
+      ]
+    },
+    {
+      "id": "rag-pipeline-reviewer",
+      "description": "Reviews RAG (Retrieval-Augmented Generation) pipelines for retrieval quality, chunking strategy, embedding choices, and evaluation coverage. Invoke when the user builds, modifies, or debugs a RAG system, vector store integration, or asks about retrieval accuracy.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash"
+      ]
+    },
+    {
+      "id": "react-build-resolver",
+      "description": "Diagnose and fix React build failures across Vite, webpack, Next.js, CRA, Parcel, esbuild, and Bun. Handles JSX/TSX compile errors, hydration mismatches, server/client component boundary failures, missing types, and bundler-specific configuration issues with minimal, surgical changes. MUST BE USED when a React build fails.",
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Bash",
+        "Grep",
+        "Glob"
+      ]
+    },
+    {
+      "id": "react-reviewer",
+      "description": "Expert React/JSX code reviewer specializing in hook correctness, render performance, server/client component boundaries, accessibility, and React-specific security. Use for any change touching .tsx/.jsx files or React component logic. MUST BE USED for React projects.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash"
+      ]
+    },
+    {
+      "id": "refactor-cleaner",
+      "description": "Dead code cleanup and consolidation specialist. Use PROACTIVELY for removing unused code, duplicates, and refactoring. Runs analysis tools (knip, depcheck, ts-prune) to identify dead code and safely removes it.",
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Bash",
+        "Grep",
+        "Glob"
+      ]
+    },
+    {
+      "id": "ruby-reviewer",
+      "description": "Expert Ruby and Rails code reviewer specializing in idiomatic Ruby, Active Record query safety, Rails security defaults, and RSpec/Minitest quality. Use for all Ruby code changes. MUST BE USED for Ruby and Rails projects.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash"
+      ]
+    },
+    {
+      "id": "rust-build-resolver",
+      "description": "Rust build, compilation, and dependency error resolution specialist. Fixes cargo build errors, borrow checker issues, and Cargo.toml problems with minimal changes. Use when Rust builds fail.",
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Bash",
+        "Grep",
+        "Glob"
+      ]
+    },
+    {
+      "id": "rust-reviewer",
+      "description": "Expert Rust code reviewer specializing in ownership, lifetimes, error handling, unsafe usage, and idiomatic patterns. Use for all Rust code changes. MUST BE USED for Rust projects.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash"
+      ]
+    },
+    {
+      "id": "security-reviewer",
+      "description": "Security vulnerability detection and remediation specialist. Use PROACTIVELY after writing code that handles user input, authentication, API endpoints, or sensitive data. Flags secrets, SSRF, injection, unsafe crypto, and OWASP Top 10 vulnerabilities.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash"
+      ]
+    },
+    {
+      "id": "seo-specialist",
+      "description": "SEO specialist for technical SEO audits, on-page optimization, structured data, Core Web Vitals, and content/keyword mapping. Use for site audits, meta tag reviews, schema markup, sitemap and robots issues, and SEO remediation plans.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "WebSearch",
+        "WebFetch"
+      ]
+    },
+    {
+      "id": "silent-failure-hunter",
+      "description": "Review code for silent failures, swallowed errors, bad fallbacks, and missing error propagation.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash"
+      ]
+    },
+    {
+      "id": "spec-miner",
+      "description": "Extracts behavioral specs from existing codebases for OpenSpec. Produces flat Requirement and Invariant blocks with structured metadata (entities, enforced, id, test anchors). Outputs openspec/specs/<capability>/spec.md. Fully self-bootstrapping — no dependency on codebase-onboarding. Use when onboarding a brownfield project to spec-driven development.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash",
+        "Write"
+      ]
+    },
+    {
+      "id": "swift-build-resolver",
+      "description": "Swift/Xcode build, compilation, and dependency error resolution specialist. Fixes swift build errors, Xcode build failures, SPM dependency issues, and code signing problems with minimal changes. Use when Swift builds fail.",
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Bash",
+        "Grep",
+        "Glob"
+      ]
+    },
+    {
+      "id": "swift-reviewer",
+      "description": "Expert Swift code reviewer specializing in protocol-oriented design, value semantics, ARC memory management, Swift Concurrency, and idiomatic patterns. Use for all Swift code changes. MUST BE USED for Swift projects.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash"
+      ]
+    },
+    {
+      "id": "tdd-guide",
+      "description": "Test-Driven Development specialist enforcing write-tests-first methodology. Use PROACTIVELY when writing new features, fixing bugs, or refactoring code. Ensures 80%+ test coverage.",
+      "tools": [
+        "Read",
+        "Write",
+        "Edit",
+        "Bash",
+        "Grep"
+      ]
+    },
+    {
+      "id": "type-design-analyzer",
+      "description": "Analyze type design for encapsulation, invariant expression, usefulness, and enforcement.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob"
+      ]
+    },
+    {
+      "id": "typescript-reviewer",
+      "description": "Expert TypeScript/JavaScript code reviewer specializing in type safety, async correctness, Node/web security, and idiomatic patterns. Use for all TypeScript and JavaScript code changes. MUST BE USED for TypeScript/JavaScript projects.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash"
+      ]
+    },
+    {
+      "id": "vue-reviewer",
+      "description": "Expert Vue.js code reviewer specializing in Composition API correctness, reactivity pitfalls, component architecture, template security, and Vue-specific performance. Use for any change touching .vue, .ts/.js files with Vue imports, or Vue ecosystem code (Pinia, Vue Router, Nuxt). MUST BE USED for Vue projects.",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash"
+      ]
+    }
+  ]
+}
