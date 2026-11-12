@@ -21,7 +21,7 @@ body {
 
 body {
   display: grid;
-  grid-template-rows: auto auto 1fr;
+  grid-template-rows: auto auto 1fr auto;
   background: var(--bg);
   color: var(--text);
   overflow: hidden;
@@ -127,6 +127,53 @@ button:hover {
   display: block;
   cursor: grab;
   touch-action: none;
+}
+
+#mission {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--panel);
+  border-top: 2px solid var(--line);
+  font-size: 13px;
+}
+
+#mission label {
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+#mission input {
+  flex: 1;
+  min-width: 0;
+  max-width: 520px;
+  padding: 7px 10px;
+  font: inherit;
+  color: var(--text);
+  background: var(--bg);
+  border: 2px solid var(--line);
+}
+
+#mission input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+#mission-status {
+  flex: 1;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#fiche .mission {
+  padding: 8px 10px;
+  background: var(--bg);
+  border-left: 3px solid var(--accent);
 }
 
 #fiche {

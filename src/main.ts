@@ -1,9 +1,10 @@
 import { loadAgents, type Agent } from './data';
 import { Game } from './game';
 import { buildMap } from './map';
+import { fold, planMission, type Step } from './missions';
 import { characterSprite, lookFor } from './sprites';
 
-const { agents, poles, version } = loadAgents();
+const { agents, poles, version, chef } = loadAgents();
 const poleById = new Map(poles.map((p) => [p.id, p]));
 const agentById = new Map(agents.map((a) => [a.id, a]));
 const map = buildMap(poles.map((p) => ({ pole: p.id, prop: p.prop, agents: agents.filter((a) => a.pole === p.id).map((a) => a.id) })));
@@ -20,7 +21,6 @@ let selected: string | null = null;
 
 const game = new Game(canvas, agents, poleById, map, select);
 
-const fold = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 const esc = (s: string) => s.replace(/[&<>"']/g, (ch) => `&#${ch.charCodeAt(0)};`);
 
 const haystack = new Map(
@@ -60,6 +60,8 @@ function select(id: string | null): void {
         <code>ecc:${esc(agent.id)}</code>
       </div>
     </div>
+    <h3>Mission en cours</h3>
+    <p class="mission">${esc(missionOf(agent.id))}</p>
     <h3>Rôle</h3>
     <p>${esc(agent.role)}</p>
     ${agent.competences.length ? `<h3>Compétences</h3><ul>${list(agent.competences)}</ul>` : ''}
@@ -71,6 +73,77 @@ function select(id: string | null): void {
   portrait.getContext('2d')!.drawImage(characterSprite(lookFor(agent.id, pole.couleur), 'stand', false).img, 0, 0);
   fiche.querySelector('.close')!.addEventListener('click', () => select(null));
 }
+
+// Missions simulees : le chef planifie, puis chaque agent de l'equipe travaille a son tour.
+type RunStep = Step & { state: 'attente' | 'cours' | 'fini' };
+const CHEF_SECONDS = 4;
+const STEP_SECONDS = 6;
+const pending: string[] = [];
+let run: { text: string; steps: RunStep[] } | null = null;
+let lastDone = '';
+const missionStatus = $('mission-status');
+const short = (s: string, n: number) => (s.length > n ? s.slice(0, n - 1) + '…' : s);
+
+function missionOf(id: string): string {
+  const step = run?.steps.find((s) => s.id === id);
+  if (!step) return 'Aucune mission en cours.';
+  if (step.state === 'cours') return step.label;
+  return step.state === 'attente' ? `En attente : ${step.label}` : `Terminé : ${step.label}`;
+}
+
+function refreshMission(): void {
+  const waiting = pending.length ? ` (${pending.length} en attente)` : '';
+  if (run) {
+    const i = run.steps.findIndex((s) => s.state === 'cours');
+    const who = agentById.get(run.steps[i]?.id ?? '')?.prenom ?? '';
+    missionStatus.textContent = `Étape ${i + 1}/${run.steps.length} : ${who} travaille sur « ${run.text} »${waiting}`;
+  } else {
+    missionStatus.textContent = lastDone ? `Mission terminée : « ${lastDone} »` : 'Aucune mission en cours.';
+  }
+  const line = fiche.querySelector('.mission');
+  if (line && selected) line.textContent = missionOf(selected);
+}
+
+function advance(i: number): void {
+  if (!run) return;
+  const previous = run.steps[i - 1];
+  if (previous) {
+    previous.state = 'fini';
+    game.setMission(previous.id, null);
+  }
+  const step = run.steps[i];
+  if (!step) {
+    lastDone = run.text;
+    run = null;
+    startNext();
+    return;
+  }
+  step.state = 'cours';
+  game.setMission(step.id, short(step.label, 36));
+  refreshMission();
+  setTimeout(() => advance(i + 1), (i === 0 ? CHEF_SECONDS : STEP_SECONDS) * 1000);
+}
+
+function startNext(): void {
+  const text = pending.shift();
+  if (text) {
+    run = { text, steps: planMission(text, agents, chef).map((s) => ({ ...s, state: 'attente' })) };
+    advance(0);
+  } else {
+    refreshMission();
+  }
+}
+
+$<HTMLFormElement>('mission').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const input = $<HTMLInputElement>('mission-text');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  pending.push(text);
+  if (run) refreshMission();
+  else startNext();
+});
 
 function poleButton(label: string, poleId: string | null, color: string, n: number): HTMLButtonElement {
   const b = document.createElement('button');
@@ -114,4 +187,5 @@ $('zoom-out').addEventListener('click', () => game.zoomBy(-1));
 };
 
 applyFilter();
+refreshMission();
 game.start();

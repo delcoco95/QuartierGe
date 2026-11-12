@@ -384,6 +384,10 @@ export class Game {
       if (pole) label(pole.nom, screenX(z.x, z.y), screenY(z.x, z.y) - HALF_H - 3, pole.couleur, '#11131a');
     }
 
+    for (const l of this.map.labels) {
+      label(l.text, screenX(l.x, l.y), screenY(l.x, l.y) - 30, '#e8ebf2', '#11131a');
+    }
+
     const named = this.highlight && this.highlight.size <= 30 ? this.highlight : null;
     for (const a of this.actors) {
       const id = a.agent.id;

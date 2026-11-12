@@ -22,6 +22,7 @@ export interface OfficeMap {
   furniture: Furniture[];
   seats: Record<string, Tile>;
   spots: Tile[];
+  labels: (Tile & { text: string })[];
   blocked: Uint8Array;
   seatOwner: (string | null)[];
   zoneAt: Int16Array;
@@ -73,6 +74,12 @@ const SPOTS: Tile[] = [
   { x: 33, y: 11 }, { x: 32, y: 10 },
 ];
 
+const LABELS = [
+  { text: 'Coin café', x: 3, y: 9 },
+  { text: 'Salle de réunion', x: 15, y: 10 },
+  { text: 'Détente', x: 27, y: 9 },
+];
+
 export function buildMap(groups: Group[]): OfficeMap {
   const zones: Zone[] = [];
   const furniture: Furniture[] = [...COMMON];
@@ -113,7 +120,7 @@ export function buildMap(groups: Group[]): OfficeMap {
   for (const f of furniture) if (f.blocking) blocked[f.y * w + f.x] = 1;
   for (const [id, s] of Object.entries(seats)) seatOwner[s.y * w + s.x] = id;
 
-  return { w, h, zones, furniture, seats, spots: SPOTS, blocked, seatOwner, zoneAt };
+  return { w, h, zones, furniture, seats, spots: SPOTS, labels: LABELS, blocked, seatOwner, zoneAt };
 }
 
 const STEPS = [[1, 0], [-1, 0], [0, 1], [0, -1]] as const;

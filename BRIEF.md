@@ -13,6 +13,7 @@ Une app web locale qui présente les 71 agents du plugin ECC (ecc@ecc, version 2
 | Graphismes | Pixel art dessiné en code (aucun fichier d'asset externe). Personnage paramétrable : cheveux, teint, tenue, couleur du pôle. |
 | Stack | Vite + TypeScript, rendu Canvas 2D, fiches en HTML/CSS par-dessus le canvas. Pas de framework, pas de moteur de jeu. |
 | Interactions V1 | Clic sur un agent pour ouvrir sa fiche, déplacement et zoom, recherche et filtre par pôle, agents qui se déplacent. |
+| Missions | Barre « Confier une mission au chef » en bas de page. En V1 c'est une simulation : le chef (`planner`) planifie, puis jusqu'à 3 agents choisis d'après les mots de la demande travaillent à tour de rôle. Aucun agent Claude Code n'est lancé. La fiche affiche la mission en cours. |
 | Prénoms | Fournis par le propriétaire du projet (colonne à remplir en section 4). |
 | Langue | Interface et fiches en français. L'identifiant technique de l'agent reste en anglais. |
 

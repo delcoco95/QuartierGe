@@ -18,6 +18,12 @@
     </header>
     <nav id="poles" aria-label="Pôles"></nav>
     <canvas id="office"></canvas>
+    <form id="mission">
+      <label for="mission-text">Confier une mission au chef</label>
+      <input id="mission-text" type="text" placeholder="Ex. : corriger le build Rust et relire le code" autocomplete="off" required maxlength="200" />
+      <button type="submit">Confier</button>
+      <span id="mission-status" aria-live="polite"></span>
+    </form>
     <aside id="fiche" hidden aria-label="Fiche de l'agent"></aside>
     <script type="module" src="/src/main.ts"></script>
   </body>

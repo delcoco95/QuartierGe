@@ -1,4 +1,5 @@
 {
+  "chef": "planner",
   "poles": [
     { "id": "direction", "nom": "Direction", "couleur": "#c0455a", "prop": "tableau" },
     { "id": "qualite", "nom": "Qualité", "couleur": "#3b82c4", "prop": "ecran" },
