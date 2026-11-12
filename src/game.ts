@@ -1,6 +1,6 @@
 import type { Agent, Pole } from './data';
 import { findPath, type Building, type Floor, type Seat, type Tile } from './map';
-import { characterSprite, floorSprite, furnitureSprite, lookFor, mix, ringSprite, type Look, type Pose, type Sprite } from './sprites';
+import { characterSprite, floorSprite, furnitureSprite, lookFor, mix, ringSprite, SKY, skyPhase, type Look, type Material, type Phase, type Pose, type Sprite } from './sprites';
 
 const HALF_W = 16;
 const HALF_H = 8;
@@ -11,6 +11,12 @@ const MAX_ZOOM = 6;
 const LIFT_SECONDS = 2.5;
 const DOOR_RANGE = 1.3;
 const DOWNSTAIRS_CHANCE = 0.25;
+// Hauteur d'un etage de facade et marge de terrain dessinee autour de l'immeuble, en tuiles.
+const STORY = 36;
+const MARGIN = 6;
+const PARQUET = new Set(['chef', 'conseil', 'salon']);
+const TILED = new Set(['kitchenette', 'cafeteria', 'accueil']);
+const BLINKING = new Set(['serveur', 'baie']);
 
 type State = 'sit' | 'move' | 'idle';
 type Leg = { walk: Tile } | { lift: number };
@@ -34,6 +40,10 @@ interface Actor {
   back: boolean;
   phase: number;
   mission: string | null;
+  /** La mission vient d'une vraie session Claude Code : l'ecran du bureau s'allume. */
+  live: boolean;
+  /** En pause sur une chaise (salle de reunion). */
+  seated: boolean;
   wantCafe: boolean;
 }
 
@@ -46,6 +56,13 @@ interface Drawable {
   /** Porte ou ascenseur : sprite ouvert et case qui declenche l'ouverture. */
   open?: Sprite;
   door?: Tile;
+  /** Fenetre : le sprite depend de l'heure. */
+  window?: boolean;
+  /** Seconde image des LED qui clignotent. */
+  alt?: Sprite;
+  /** Bureau : sprite a ecran allume et agent a qui il appartient. */
+  lit?: Sprite;
+  owner?: Actor;
 }
 
 const rand = (min: number, max: number) => min + Math.random() * (max - min);
@@ -63,6 +80,8 @@ export class Game {
   private readonly grounds: (HTMLCanvasElement | undefined)[] = [];
   private readonly takenSpots = new Set<string>();
   private readonly liftOpen: number[];
+  private phase: Phase = skyPhase(new Date().getHours());
+  private hourOverride: number | null = null;
   private view = 0;
   private zoom = 2;
   private camX = 0;
@@ -91,22 +110,37 @@ export class Game {
       const actor: Actor = {
         agent, home, look: lookFor(agent.id, color), floor: home.floor,
         x: home.x, y: home.y, state: 'sit', path: [], legs: [], goal: 'sit', lift: 0, liftTo: home.floor,
-        timer: rand(2, 60), spot: null, back: false, phase: Math.random() * 10, mission: null, wantCafe: false,
+        timer: rand(2, 60), spot: null, back: false, phase: Math.random() * 10, mission: null, live: false, seated: false, wantCafe: false,
       };
       this.actors.push(actor);
       this.byId.set(agent.id, actor);
     }
 
-    this.statics = building.floors.map((floor) => floor.furniture.map((f): Drawable => {
-      const owner = f.agent ? this.byId.get(f.agent) : undefined;
-      const pole = poles.get(owner?.agent.pole ?? floor.rooms[floor.roomAt[f.y * floor.w + f.x]]?.pole ?? '');
-      const tint = f.kind === 'bureau' ? (pole?.openSpace && owner ? owner.look.shirt : '') : pole?.couleur ?? '';
-      const base = { depth: f.x + f.y - (f.kind === 'chaise' ? 0.2 : 0), sx: screenX(f.x, f.y), sy: screenY(f.x, f.y) };
-      if (f.kind === 'porte' || f.kind === 'ascenseur') {
-        return { ...base, sprite: furnitureSprite(f.kind), open: furnitureSprite(`${f.kind}${f.kind === 'porte' ? '-ouverte' : '-ouvert'}`), door: { x: f.x, y: f.y } };
-      }
-      return { ...base, sprite: furnitureSprite(f.kind, tint) };
-    }));
+    this.statics = building.floors.map((floor) => {
+      const list = floor.furniture.map((f): Drawable => {
+        const owner = f.agent ? this.byId.get(f.agent) : undefined;
+        const pole = poles.get(owner?.agent.pole ?? floor.rooms[floor.roomAt[f.y * floor.w + f.x]]?.pole ?? '');
+        const base = { depth: f.x + f.y - (f.kind === 'chaise' ? 0.2 : 0), sx: screenX(f.x, f.y), sy: screenY(f.x, f.y) };
+        if (f.kind === 'porte' || f.kind === 'ascenseur') {
+          return { ...base, sprite: furnitureSprite(f.kind), open: furnitureSprite(`${f.kind}${f.kind === 'porte' ? '-ouverte' : '-ouvert'}`), door: { x: f.x, y: f.y } };
+        }
+        if (f.kind === 'bureau') {
+          const flag = pole?.openSpace && owner ? owner.look.shirt : '';
+          return { ...base, sprite: furnitureSprite('bureau', flag), lit: furnitureSprite('bureau-live', flag), owner };
+        }
+        if (f.kind === 'fenetre') return { ...base, sprite: furnitureSprite('fenetre', this.phase), window: true };
+        if (BLINKING.has(f.kind)) return { ...base, sprite: furnitureSprite(f.kind), alt: furnitureSprite(`${f.kind}-b`) };
+        return { ...base, sprite: furnitureSprite(f.kind, pole?.couleur ?? '') };
+      });
+      // Arbres devant l'immeuble, au niveau de la rue : plus bas a l'ecran quand on est en etage.
+      const drop = floor.index * STORY;
+      const tree = (x: number, y: number) => list.push({
+        depth: x + y + (drop ? 1000 : 0), sprite: furnitureSprite('arbre'), sx: screenX(x, y), sy: screenY(x, y) + drop,
+      });
+      for (let y = 1; y < floor.h + 3; y += 4) tree(floor.w + 3, y);
+      for (let x = 1; x < floor.w; x += 4) tree(x, floor.h + 3);
+      return list;
+    });
 
     this.bind();
   }
@@ -178,10 +212,11 @@ export class Game {
   }
 
   /** Donne une mission a un agent : il regagne son bureau (par l'ascenseur au besoin) et sa bulle affiche le libelle. */
-  setMission(id: string, label: string): void {
+  setMission(id: string, label: string, live = false): void {
     const a = this.byId.get(id);
     if (!a) return;
     a.mission = label;
+    a.live = live;
     a.wantCafe = false;
     const headingHome = a.state === 'move' && a.goal === 'sit';
     if (a.state !== 'sit' && !headingHome) this.goTo(a, a.home.floor, a.home, 'sit', null);
@@ -192,7 +227,13 @@ export class Game {
     const a = this.byId.get(id);
     if (!a || !a.mission) return;
     a.mission = null;
+    a.live = false;
     a.wantCafe = true;
+  }
+
+  /** Force l'heure du ciel (0-23) pour tester le rendu ; null revient a l'heure reelle. */
+  setHour(hour: number | null): void {
+    this.hourOverride = hour;
   }
 
   private whereIs(a: Actor): number {
@@ -210,6 +251,7 @@ export class Game {
     if (spot) this.takenSpots.add(spot);
     a.goal = goal;
     a.state = 'move';
+    a.seated = false;
     const inLift = a.lift > 0;
     const from = this.whereIs(a);
     if (from === floor) a.legs = [{ walk: tile }];
@@ -237,6 +279,10 @@ export class Game {
       a.back = false;
       a.state = a.goal === 'idle' ? 'idle' : 'sit';
       a.timer = a.goal === 'idle' ? rand(5, 11) : rand(25, 90);
+      if (a.state === 'idle' && a.spot) {
+        const [floor, index] = a.spot.split(':').map(Number);
+        a.seated = this.building.floors[floor].spots[index].seat;
+      }
       return;
     }
     if ('lift' in leg) {
@@ -256,6 +302,12 @@ export class Game {
 
   private update(dt: number): void {
     this.clock += dt;
+    const phase = skyPhase(this.hourOverride ?? new Date().getHours());
+    if (phase !== this.phase) {
+      this.phase = phase;
+      // Les fenetres de la facade dependent de l'heure : on repeint les sols.
+      this.grounds.length = 0;
+    }
     let away = 0;
     for (const a of this.actors) if (a.state !== 'sit') away++;
 
@@ -337,22 +389,71 @@ export class Game {
   private ground(floor: Floor): HTMLCanvasElement {
     const cached = this.grounds[floor.index];
     if (cached) return cached;
+    const { w, h } = floor;
+    const drop = floor.index * STORY;
     const canvas = document.createElement('canvas');
-    canvas.width = (floor.w + floor.h) * HALF_W;
-    canvas.height = (floor.w + floor.h) * HALF_H + HALF_H;
+    canvas.width = (w + h + 2 * MARGIN) * HALF_W;
+    canvas.height = (w + h + 2 * MARGIN) * HALF_H + HALF_H + drop;
     const c = canvas.getContext('2d')!;
-    const originX = floor.h * HALF_W;
-    for (let y = 0; y < floor.h; y++) {
-      for (let x = 0; x < floor.w; x++) {
-        const room = floor.rooms[floor.roomAt[y * floor.w + x]];
-        const tint = room ? this.poles.get(room.pole ?? '')?.couleur ?? room.couleur : undefined;
-        const base = tint ? mix(tint, '#2b2f3a', 0.6) : x <= 3 ? '#5a6070' : '#4b5160';
-        const sprite = floorSprite((x + y) % 2 ? base : mix(base, '#000000', 0.07));
-        c.drawImage(sprite.img, originX + (x - y) * HALF_W - sprite.ax, (x + y) * HALF_H + HALF_H - sprite.ay);
+    const [originX, originY] = this.groundOrigin(floor);
+    const tile = (material: Material, color: string, x: number, y: number, dy = 0) => {
+      const sprite = floorSprite(material, color, (x + y) & 1);
+      c.drawImage(sprite.img, originX + (x - y) * HALF_W - sprite.ax, originY + (x + y) * HALF_H - sprite.ay + dy);
+    };
+
+    // 1. La rue : trottoir autour de l'immeuble puis herbe, au niveau du sol (donc plus bas en etage).
+    for (let y = -MARGIN; y < h + MARGIN; y++) {
+      for (let x = -MARGIN; x < w + MARGIN; x++) {
+        const out = Math.max(-x, x - (w - 1), -y, y - (h - 1));
+        if (out > 0) tile(out <= 2 ? 'trottoir' : 'herbe', out <= 2 ? '#9aa0aa' : '#4f9a52', x, y, drop);
+      }
+    }
+
+    // 2. Les deux facades visibles, qui descendent du plancher jusqu'a la rue.
+    const [skyTop, skyBottom] = SKY[this.phase];
+    const glass = mix(skyTop, skyBottom, 0.5);
+    const face = (length: number, at: (i: number) => [number, number], wall: string) => {
+      for (let i = 0; i < length * HALF_W; i++) {
+        const [sx, sy] = at(i);
+        const col = Math.floor(i / HALF_W);
+        const inWindow = i % HALF_W >= 4 && i % HALF_W <= 11;
+        for (let d = 0; d < Math.max(drop, 4); d++) {
+          const level = Math.floor(d / STORY);
+          const within = d % STORY;
+          let color = within < 4 ? mix(wall, '#ffffff', 0.25) : wall;
+          if (inWindow && within >= 11 && within <= 25) {
+            const lit = this.phase === 'nuit' && (col * 7 + level * 13 + floor.index) % 3 !== 0;
+            color = lit ? '#ffd27a' : this.phase === 'nuit' ? '#1a2140' : mix(glass, wall, 0.15);
+          }
+          c.fillStyle = color;
+          c.fillRect(originX + sx, originY + sy + d, 1, 1);
+        }
+      }
+    };
+    face(w, (i) => [-h * HALF_W + i, (h - 1) * HALF_H + Math.floor(i / 2)], '#cfc8b8');
+    face(h, (i) => [(w - h) * HALF_W + i, (w + h - 1) * HALF_H - Math.floor(i / 2) - 1], '#aaa291');
+
+    // 3. Le plancher de l'etage.
+    const hall = floor.index === 0;
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        const room = floor.rooms[floor.roomAt[y * w + x]];
+        if (!room) {
+          tile(hall ? 'carrelage' : 'beton', hall ? '#c9c2b4' : x <= 3 ? '#7a808c' : '#6c727e', x, y);
+          continue;
+        }
+        const pole = this.poles.get(room.pole ?? '');
+        if (PARQUET.has(room.kind) || room.pole === 'direction') tile('parquet', '#a9773f', x, y);
+        else if (TILED.has(room.kind)) tile('carrelage', '#d6cfc0', x, y);
+        else tile('moquette', mix(pole?.couleur ?? room.couleur ?? '#8a8f98', '#2b2f3a', 0.55), x, y);
       }
     }
     this.grounds[floor.index] = canvas;
     return canvas;
+  }
+
+  private groundOrigin(floor: Floor): [number, number] {
+    return [(floor.h + MARGIN) * HALF_W, 2 * MARGIN * HALF_H + HALF_H];
   }
 
   private bind(): void {
@@ -412,7 +513,7 @@ export class Game {
 
   private pose(a: Actor): Pose {
     if (a.state === 'sit') return Math.floor(this.clock * 5 + a.phase) % 2 ? 'sit1' : 'sit0';
-    if (a.state === 'idle') return 'stand';
+    if (a.state === 'idle') return a.seated ? 'sit0' : 'stand';
     return Math.floor(this.clock * 8 + a.phase) % 2 ? 'walk1' : 'walk0';
   }
 
@@ -437,7 +538,9 @@ export class Game {
     ctx.fillRect(0, 0, width, height);
     ctx.imageSmoothingEnabled = false;
     ctx.setTransform(s, 0, 0, s, this.camX, this.camY);
-    ctx.drawImage(this.ground(floor), -floor.h * HALF_W, -HALF_H);
+    const [originX, originY] = this.groundOrigin(floor);
+    ctx.drawImage(this.ground(floor), -originX, -originY);
+    const blink = Math.floor(this.clock * 2) % 2 === 1;
 
     const here = this.actors.filter((a) => this.visible(a));
     const items: Drawable[] = this.statics[this.view].slice();
@@ -458,6 +561,9 @@ export class Game {
       const a = it.actor;
       if (!a) {
         let sprite = it.sprite;
+        if (it.window) sprite = furnitureSprite('fenetre', this.phase);
+        else if (it.alt && blink) sprite = it.alt;
+        else if (it.lit && it.owner?.live && it.owner.state === 'sit') sprite = it.lit;
         if (it.door && it.open) {
           const d = it.door;
           const near = here.some((p) => Math.abs(p.x - d.x) + Math.abs(p.y - d.y) < DOOR_RANGE);

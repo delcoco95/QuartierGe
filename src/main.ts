@@ -314,7 +314,7 @@ connectLive({
     if (active) {
       const text = label ?? 'travaille';
       liveLabels.set(id, text);
-      game.setMission(id, short(text, 36));
+      game.setMission(id, short(text, 36), true);
       // "réfléchit" revient après chaque outil : inutile de le répéter dans le fil.
       if (text !== 'réfléchit') addFeed(`${who(a)} : ${text}`);
     } else {
@@ -338,6 +338,10 @@ connectLive({
 });
 
 (window as unknown as Record<string, unknown>).quartierGeneral = { version };
+
+// ?heure=22 force l'heure du ciel, pour voir le rendu de nuit en plein jour.
+const forcedHour = new URLSearchParams(location.search).get('heure');
+if (forcedHour !== null && forcedHour !== '') game.setHour(Number(forcedHour) % 24);
 
 applyFilter();
 refreshMission();

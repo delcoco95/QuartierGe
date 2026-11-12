@@ -24,6 +24,8 @@ export interface Furniture extends Tile {
 
 export interface Spot extends Tile {
   cafe: boolean;
+  /** Une chaise s'y trouve : l'agent s'assoit au lieu de rester debout. */
+  seat: boolean;
 }
 
 export interface Floor {
@@ -71,6 +73,8 @@ const MIN_WIDTH = 14;
 
 type Item = [kind: string, dx: number, dy: number];
 type SpotDef = [dx: number, dy: number, cafe?: boolean];
+const PLANTS = ['plante', 'plante-g', 'plante-p'];
+const SEATED = new Set(['reunion', 'conseil']);
 
 interface Template {
   nom: string;
@@ -91,12 +95,12 @@ const TEMPLATES: Record<string, Template> = {
   },
   reunion: {
     nom: 'Salle de réunion', w: 7, couleur: '#5f7a94',
-    items: [...grid('table', [1, 2, 3, 4], [2, 3]), ['tableau', 2, 0]],
+    items: [...grid('table', [1, 2, 3, 4], [2, 3]), ['ecranmural', 2, 0], ['plante', 5, 0]],
     spots: [[0, 2], [0, 3], [5, 2], [5, 3], [1, 1], [2, 1], [3, 1], [4, 1], [1, 4], [2, 4], [3, 4], [4, 4]],
   },
   conseil: {
     nom: 'Salle du conseil', w: 9, couleur: '#7a5c8a',
-    items: [...grid('table', [1, 2, 3, 4, 5, 6], [2, 3]), ['tableau', 3, 0], ['plante', 0, 0]],
+    items: [...grid('table', [1, 2, 3, 4, 5, 6], [2, 3]), ['ecranmural', 3, 0], ['plante', 0, 0], ['plante', 7, 0]],
     spots: [[0, 2], [0, 3], [7, 2], [7, 3], [1, 1], [2, 1], [3, 1], [4, 1], [5, 1], [6, 1], [1, 4], [2, 4], [3, 4], [4, 4], [5, 4], [6, 4]],
   },
   serveurs: {
@@ -106,7 +110,7 @@ const TEMPLATES: Record<string, Template> = {
   },
   archives: {
     nom: 'Archives et imprimantes', w: 5, couleur: '#8a7a5a',
-    items: [...grid('biblio', [0, 1, 2], [0]), ['imprimante', 0, 3], ['imprimante', 1, 3]],
+    items: [...grid('biblio', [0, 1], [0]), ['armoire', 2, 0], ['armoire', 3, 0], ['imprimante', 0, 3], ['imprimante', 1, 3]],
     spots: [[1, 1], [0, 4], [2, 3]],
   },
   labo: {
@@ -197,7 +201,11 @@ function buildFloor(etage: Etage, index: number, groups: Group[], chef: string, 
 
     if (plan.template) {
       for (const [kind, dx, dy] of plan.template.items) furniture.push({ kind, x: x0 + dx, y: y0 + dy, blocking: true });
-      for (const [dx, dy, cafe] of plan.template.spots) spots.push({ x: x0 + dx, y: y0 + dy, cafe: Boolean(cafe) });
+      const seat = SEATED.has(plan.kind);
+      for (const [dx, dy, cafe] of plan.template.spots) {
+        spots.push({ x: x0 + dx, y: y0 + dy, cafe: Boolean(cafe), seat });
+        if (seat) furniture.push({ kind: 'chaise', x: x0 + dx, y: y0 + dy, blocking: false });
+      }
       continue;
     }
 
@@ -214,6 +222,7 @@ function buildFloor(etage: Etage, index: number, groups: Group[], chef: string, 
       furniture.push({ kind: 'tableau', x: x0 + 3, y: y0, blocking: true });
       furniture.push({ kind: 'plante', x: x0, y: y0 + 5, blocking: true });
       furniture.push({ kind: 'canape', x: x0 + 2, y: y0 + 5, blocking: true });
+      furniture.push({ kind: 'armoire', x: x0, y: y0, blocking: true });
     } else {
       furniture.push({ kind: plan.prop ?? 'plante', x: x0 + plan.w - 1, y: y0, blocking: true });
     }
@@ -241,6 +250,9 @@ function buildFloor(etage: Etage, index: number, groups: Group[], chef: string, 
   }
   for (let y = 1; y < HEIGHT; y++) furniture.push({ kind: y % 2 === 0 ? 'fenetre' : 'mur', x: 0, y, blocking: true });
   furniture.push({ kind: 'plante', x: 1, y: HEIGHT - 1, blocking: true });
+
+  // Plantes de trois tailles, choisies selon la position pour que le plan reste stable.
+  for (const f of furniture) if (f.kind === 'plante') f.kind = PLANTS[(f.x * 7 + f.y * 3) % PLANTS.length];
 
   const blocked = new Uint8Array(w * HEIGHT);
   const seatOwner: (string | null)[] = new Array(w * HEIGHT).fill(null);
