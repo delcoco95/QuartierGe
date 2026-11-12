@@ -94,6 +94,7 @@ export function ringSprite(color: string): Sprite {
   });
 }
 
+const WALL = 40;
 const BOOKS = ['#e5484d', '#3b82c4', '#f2c14e', '#43a047'];
 
 function drawFurniture(c: Ctx, kind: string, tint: string): void {
@@ -213,13 +214,90 @@ function drawFurniture(c: Ctx, kind: string, tint: string): void {
       block(c, cx, cy, 5, 12, '#e8edf2');
       block(c, cx, 32, 4, 7, '#7cc4ee');
       break;
+    case 'mur':
+    case 'fenetre':
+    case 'logo': {
+      block(c, cx, cy, 16, WALL, '#efe9dc', '#d9d2c2', '#c4bcab');
+      if (kind !== 'mur') {
+        const pane = kind === 'logo' ? '#ffd84a' : '#8ecae6';
+        for (let off = 8; off < 27; off++) {
+          const bar = kind === 'fenetre' && off === 17;
+          faceLine(c, cx, cy, 16, WALL, -1, off, 3, 12, bar ? '#efe9dc' : pane);
+          faceLine(c, cx, cy, 16, WALL, 1, off, 3, 12, bar ? '#c4bcab' : dark(pane, 0.18));
+        }
+      }
+      break;
+    }
+    case 'ascenseur':
+    case 'ascenseur-ouvert': {
+      block(c, cx, cy, 16, WALL, '#efe9dc', '#d9d2c2', '#c4bcab');
+      const open = kind === 'ascenseur-ouvert';
+      for (let off = 9; off < WALL; off++) {
+        faceLine(c, cx, cy, 16, WALL, -1, off, 1, 14, off === 9 ? '#555b68' : open ? '#1b1e27' : '#aab2bd');
+        if (!open && off > 9) faceLine(c, cx, cy, 16, WALL, -1, off, 7, 7, '#6d7684');
+      }
+      faceLine(c, cx, cy, 16, WALL, -1, 5, 6, 9, open ? '#5fe08a' : '#ffd84a');
+      break;
+    }
+    case 'cloison':
+      c.globalAlpha = 0.34;
+      block(c, cx, cy, 16, 13, '#d7eef7', '#9fd3e8', '#86c2da');
+      c.globalAlpha = 1;
+      break;
+    case 'porte':
+      c.globalAlpha = 0.92;
+      block(c, cx, cy, 16, 13, '#a47c4f', '#8a6a45', '#6f5436');
+      c.globalAlpha = 1;
+      faceLine(c, cx, cy, 16, 13, -1, 7, 11, 12, '#ffd84a');
+      break;
+    case 'porte-ouverte':
+      px(c, 0, cy - 13, 2, 14, '#8a6a45');
+      px(c, 30, cy - 13, 2, 14, '#6f5436');
+      break;
+    case 'evier':
+      block(c, cx, cy, 13, 9, '#d9d2c5');
+      block(c, cx, 35, 6, 1, '#8fa3b5');
+      px(c, 16, 29, 1, 4, '#aab2bd');
+      break;
+    case 'frigo':
+      block(c, cx, cy, 9, 23, '#e8edf2');
+      faceLine(c, cx, cy, 9, 23, -1, 9, 0, 8, '#b8c0ca');
+      for (let off = 3; off < 7; off++) faceLine(c, cx, cy, 9, 23, -1, off, 6, 6, '#8a8f98');
+      for (let off = 12; off < 18; off++) faceLine(c, cx, cy, 9, 23, -1, off, 6, 6, '#8a8f98');
+      break;
+    case 'mangedebout':
+      block(c, cx, cy, 3, 13, '#555b68');
+      block(c, cx, cy - 13, 9, 2, '#b08a5a');
+      block(c, 14, 28, 2, 2, '#ffffff');
+      break;
+    case 'imprimante':
+      block(c, cx, cy, 9, 8, '#cfd5dd');
+      block(c, cx, 36, 6, 3, '#f4f6f8');
+      faceLine(c, cx, cy, 9, 8, -1, 2, 1, 2, '#5fe08a');
+      faceLine(c, cx, cy, 9, 8, -1, 5, 1, 7, '#8a8f98');
+      break;
+    case 'paillasse':
+      block(c, cx, cy, 16, 9, '#cfd8dc');
+      block(c, 11, 35, 2, 4, '#5fe08a');
+      block(c, 20, 34, 2, 6, '#7cc4ee');
+      block(c, 16, 37, 2, 3, '#f2a541');
+      break;
+    case 'banque':
+      block(c, cx, cy, 16, 11, '#c9a66f', '#a8824e', '#86663b');
+      faceLine(c, cx, cy, 16, 11, -1, 4, 0, 15, '#ffd84a');
+      faceLine(c, cx, cy, 16, 11, -1, 5, 0, 15, '#ffd84a');
+      break;
     default:
       block(c, cx, cy, 8, 8, '#8a8f98');
   }
 }
 
 export function furnitureSprite(kind: string, tint = ''): Sprite {
-  return make(`f:${kind}:${tint}`, 32, 56, 16, 44, (c) => drawFurniture(c, kind, tint));
+  // 24 pixels de marge en haut pour les murs, plus hauts que le mobilier.
+  return make(`f:${kind}:${tint}`, 32, 80, 16, 68, (c) => {
+    c.translate(0, 24);
+    drawFurniture(c, kind, tint);
+  });
 }
 
 export function characterSprite(look: Look, pose: Pose, back: boolean): Sprite {

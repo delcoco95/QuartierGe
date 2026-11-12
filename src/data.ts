@@ -9,6 +9,15 @@ export interface Pole {
   openSpace?: boolean;
 }
 
+export interface Etage {
+  id: string;
+  numero: number;
+  nom: string;
+  sousTitre: string;
+  poles: string[];
+  pieces: string[];
+}
+
 export interface Agent {
   id: string;
   prenom: string;
@@ -38,7 +47,7 @@ interface GeneratedAgent {
 
 const NEWCOMERS: Pole = { id: 'nouveaux', nom: 'Nouveaux arrivants', couleur: '#8a8f98', prop: 'plante' };
 
-const roster = rosterJson as unknown as { chef?: string; poles: Pole[]; agents: Record<string, RosterEntry> };
+const roster = rosterJson as unknown as { chef?: string; etages: Etage[]; poles: Pole[]; agents: Record<string, RosterEntry> };
 
 function texts(entry: RosterEntry): Pick<Agent, 'role' | 'competences' | 'quand'> {
   if (entry.role) {
@@ -60,7 +69,7 @@ function texts(entry: RosterEntry): Pick<Agent, 'role' | 'competences' | 'quand'
   };
 }
 
-export function loadAgents(): { agents: Agent[]; poles: Pole[]; version: string; chef: string } {
+export function loadAgents(): { agents: Agent[]; poles: Pole[]; version: string; chef: string; etages: Etage[] } {
   const source = (generated as { version: string; agents: GeneratedAgent[] });
   const known = new Set(source.agents.map((a) => a.id));
   for (const id of Object.keys(roster.agents)) {
@@ -87,5 +96,5 @@ export function loadAgents(): { agents: Agent[]; poles: Pole[]; version: string;
     return { id: g.id, prenom: entry.prenom, pole: entry.pole, ...texts(entry), outils: g.tools, description: g.description };
   });
 
-  return { agents, poles: newcomers ? [...roster.poles, NEWCOMERS] : roster.poles, version: source.version, chef: roster.chef ?? 'planner' };
+  return { agents, poles: newcomers ? [...roster.poles, NEWCOMERS] : roster.poles, version: source.version, chef: roster.chef ?? 'planner', etages: [...roster.etages].sort((a, b) => a.numero - b.numero) };
 }

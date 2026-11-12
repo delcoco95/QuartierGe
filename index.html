@@ -9,7 +9,10 @@
   <body>
     <header id="bar">
       <h1>Quartier Général</h1>
-      <input id="q" type="search" placeholder="Chercher un prénom, un rôle, un outil" aria-label="Chercher un agent" autocomplete="off" />
+      <div id="search">
+        <input id="q" type="search" placeholder="Chercher un prénom, un rôle, un outil" aria-label="Chercher un agent" autocomplete="off" />
+        <ul id="results" hidden></ul>
+      </div>
       <span id="count" aria-live="polite"></span>
       <span id="live" data-state="off" aria-live="polite">Direct : hors ligne</span>
       <div id="zoom">
@@ -17,8 +20,21 @@
         <button id="zoom-in" type="button" aria-label="Zoomer">+</button>
       </div>
     </header>
-    <nav id="poles" aria-label="Pôles"></nav>
-    <canvas id="office"></canvas>
+    <div id="layout">
+      <aside id="immeuble" aria-label="Immeuble">
+        <h2>Immeuble</h2>
+        <ol id="etages"></ol>
+        <p class="hint">Page préc. / Page suiv. : changer d'étage</p>
+      </aside>
+      <canvas id="office"></canvas>
+      <aside id="activite" aria-label="Activité en direct">
+        <h2>Activité en direct</h2>
+        <h3>Missions en cours</h3>
+        <ul id="missions"></ul>
+        <h3>Fil des événements</h3>
+        <ol id="fil"></ol>
+      </aside>
+    </div>
     <form id="mission">
       <label for="mission-text">Confier une mission au chef</label>
       <input id="mission-text" type="text" placeholder="Ex. : corriger le build Rust et relire le code" autocomplete="off" required maxlength="200" />

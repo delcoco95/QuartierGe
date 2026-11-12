@@ -19,6 +19,41 @@ Une app web locale qui présente les 71 agents du plugin ECC (ecc@ecc, version 2
 
 Hors périmètre V1 : bouton « copier la commande d'appel », activité en direct, édition des fiches depuis l'interface, version mobile.
 
+## 2 bis. L'immeuble (remplace le plateau unique)
+
+Le bureau est un immeuble de six étages, décrit par la liste `etages` de `roster.json` (id, numéro, nom, sous-titre, pôles, pièces communes). Les sections 3, 7 et 9 ci-dessous décrivent l'ancien plateau unique et ne valent plus que pour le mobilier et les pôles.
+
+| Étage | Nom | Pôles | Pièces communes |
+|---|---|---|---|
+| RDC | Accueil | Nouveaux arrivants éventuels | Accueil (banque et mur logo « QG »), cafétéria, coin détente, salle de réunion |
+| 1er | Ingénierie | Build et Maintenance, Open-space Build, Réseau et Infra | Salle serveurs, salle de réunion, kitchenette |
+| 2e | Qualité et Tests | Qualité, Tests, Open-space Revue | Salle de réunion, kitchenette |
+| 3e | Documentation et Communication | Docs et Exploration, Open Source, Croissance | Archives et imprimantes, salle de réunion, kitchenette |
+| 4e | R&D – Atelier Agents | Atelier Agents | Laboratoire, salle de réunion, kitchenette |
+| 5e | Direction | Direction | Bureau d'angle du chef, salle du conseil, salon, kitchenette |
+
+Un pôle qui ne figure dans aucun étage va au rez-de-chaussée.
+
+Plan d'un étage, généré selon l'effectif :
+
+- palier d'ascenseur à gauche, portes d'ascenseur sur le mur du fond, panneau de l'étage ;
+- un couloir central, des pièces de chaque côté, réparties pour équilibrer les longueurs ;
+- une pièce par pôle (deux rangées de postes), fermée par des cloisons vitrées, avec une porte sur le couloir ;
+- murs du fond avec fenêtres, murs avant coupés (vue en coupe).
+
+Déplacements :
+
+- les trajets respectent murs et cloisons et ne passent que par les portes, qui s'ouvrent au passage ;
+- pour changer d'étage, un agent rejoint l'ascenseur, disparaît 2,5 secondes, puis réapparaît à l'étage d'arrivée ;
+- en pause, il reste en général à son étage et descend une fois sur quatre au rez-de-chaussée ;
+- quand il reçoit une mission, il remonte à son poste par l'ascenseur ; à la fin, il va au café.
+
+Interface :
+
+- à gauche, le panneau « Immeuble » : les étages du 5e au RDC avec leurs pôles cliquables, le nombre d'agents présents et un voyant quand un agent de l'étage travaille en direct ; Page préc. et Page suiv. changent d'étage ;
+- à droite, le panneau « Activité en direct » : missions en cours avec barre de progression et fil horodaté des événements ;
+- la recherche liste les résultats avec l'étage où se trouve chaque agent ; Entrée y va et ouvre la fiche.
+
 ## 3. Les pôles
 
 Onze pôles. Chaque pôle a une zone du bureau, une couleur et un mobilier distinctif.

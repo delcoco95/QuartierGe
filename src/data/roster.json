@@ -1,5 +1,13 @@
 {
   "chef": "planner",
+  "etages": [
+    { "id": "rdc", "numero": 0, "nom": "Accueil", "sousTitre": "Hall, cafétéria et détente", "poles": ["nouveaux"], "pieces": ["accueil", "cafeteria", "detente"] },
+    { "id": "e1", "numero": 1, "nom": "Ingénierie", "sousTitre": "Build, réseau et salle serveurs", "poles": ["build", "build-os", "reseau"], "pieces": ["serveurs"] },
+    { "id": "e2", "numero": 2, "nom": "Qualité et Tests", "sousTitre": "Revue de code, sécurité et tests", "poles": ["qualite", "tests", "revue"], "pieces": [] },
+    { "id": "e3", "numero": 3, "nom": "Documentation et Communication", "sousTitre": "Docs, open source et croissance", "poles": ["docs", "oss", "croissance"], "pieces": ["archives"] },
+    { "id": "e4", "numero": 4, "nom": "R&D – Atelier Agents", "sousTitre": "Évaluation et boucles d'agents", "poles": ["atelier"], "pieces": ["labo"] },
+    { "id": "e5", "numero": 5, "nom": "Direction", "sousTitre": "Planification et architecture", "poles": ["direction"], "pieces": ["conseil", "salon"] }
+  ],
   "poles": [
     { "id": "direction", "nom": "Direction", "couleur": "#c0455a", "prop": "tableau" },
     { "id": "qualite", "nom": "Qualité", "couleur": "#3b82c4", "prop": "ecran" },

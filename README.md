@@ -11,7 +11,13 @@ npm run dev
 ```
 
 - `npm run sync` relit les agents du plugin ECC installé (`~/.claude/plugins/cache/ecc/ecc/<version>/agents`) et régénère `src/data/agents.generated.json`. À relancer après une mise à jour du plugin.
-- `npm test` vérifie la carte du bureau (chaque agent a un poste, chaque espace commun est accessible).
+- `npm test` vérifie l'immeuble : chaque agent a un siège dans la pièce de son pôle, chaque siège rejoint l'ascenseur et les espaces communs sans traverser de cloison, et on ne sort d'une pièce que par sa porte.
+
+## L'immeuble
+
+Six étages, du rez-de-chaussée (accueil, cafétéria, détente) au 5e (direction). Le panneau « Immeuble » à gauche change d'étage, comme Page préc. et Page suiv. Les agents prennent l'ascenseur pour changer d'étage. Le panneau « Activité en direct » à droite montre les missions en cours et le fil des événements.
+
+La répartition des pôles par étage et les pièces communes de chaque étage sont dans la liste `etages` de `src/data/roster.json` ; le plan de chaque étage est généré par `src/map.ts` selon l'effectif.
 
 ## Modifier l'effectif
 

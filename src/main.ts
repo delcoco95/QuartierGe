@@ -1,28 +1,37 @@
 import { loadAgents, type Agent } from './data';
-import { Game } from './game';
+import { floorShort, Game } from './game';
 import { connectLive } from './live';
-import { buildMap } from './map';
+import { buildBuilding } from './map';
 import { fold, planMission, type Step } from './missions';
 import { characterSprite, lookFor } from './sprites';
 
-const { agents, poles, version, chef } = loadAgents();
+const { agents, poles, version, chef, etages } = loadAgents();
 const poleById = new Map(poles.map((p) => [p.id, p]));
 const agentById = new Map(agents.map((a) => [a.id, a]));
-const map = buildMap(poles.map((p) => ({ pole: p.id, prop: p.prop, agents: agents.filter((a) => a.pole === p.id).map((a) => a.id) })));
+const building = buildBuilding(
+  etages,
+  poles.map((p) => ({ pole: p.id, nom: p.nom, prop: p.prop, agents: agents.filter((a) => a.pole === p.id).map((a) => a.id) })),
+  chef,
+);
+const floors = building.floors;
 
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const canvas = $<HTMLCanvasElement>('office');
 const search = $<HTMLInputElement>('q');
+const results = $('results');
 const count = $('count');
-const nav = $('poles');
+const etagesList = $('etages');
 const fiche = $('fiche');
 
 let activePole: string | null = null;
 let selected: string | null = null;
 
-const game = new Game(canvas, agents, poleById, map, select);
+const game = new Game(canvas, agents, poleById, building, select);
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (ch) => `&#${ch.charCodeAt(0)};`);
+const short = (s: string, n: number) => (s.length > n ? s.slice(0, n - 1) + '…' : s);
+const floorName = (index: number) => `${floorShort(floors[index].etage.numero)} ${floors[index].etage.nom}`;
+const homeFloor = (id: string) => building.seats[id]?.floor ?? 0;
 
 const haystack = new Map(
   agents.map((a) => [a.id, fold([a.prenom, a.id, a.role, a.quand, a.description, ...a.competences, ...a.outils, poleById.get(a.pole)?.nom ?? ''].join(' '))]),
@@ -33,14 +42,89 @@ function matches(): Agent[] {
   return agents.filter((a) => (!activePole || a.pole === activePole) && words.every((w) => haystack.get(a.id)!.includes(w)));
 }
 
+// ---------- Immeuble (panneau de gauche) ----------
+
+function showFloor(index: number): void {
+  if (!floors[index]) return;
+  game.setFloor(index);
+  refreshBuilding();
+}
+
+function goToAgent(id: string): void {
+  game.focusAgent(id);
+  refreshBuilding();
+  select(id);
+}
+
+for (let i = floors.length - 1; i >= 0; i--) {
+  const { etage, rooms } = floors[i];
+  const li = document.createElement('li');
+  li.dataset.floor = String(i);
+  const chips = [...new Set(rooms.map((r) => r.pole).filter((p): p is string => Boolean(p)))]
+    .map((p) => `<button type="button" class="chip" data-pole="${esc(p)}"><i style="background:${esc(poleById.get(p)?.couleur ?? '#8a8f98')}"></i>${esc(poleById.get(p)?.nom ?? p)}</button>`)
+    .join('');
+  li.innerHTML = `
+    <button type="button" class="etage" title="${esc(etage.sousTitre)}">
+      <b>${esc(floorShort(etage.numero))}</b>
+      <span class="nom">${esc(etage.nom)}</span>
+      <span class="meta"><i class="voyant" title="Un agent de cet étage travaille en direct"></i><span class="presents"></span></span>
+    </button>
+    <div class="chips">${chips}</div>`;
+  li.querySelector('.etage')!.addEventListener('click', () => {
+    activePole = null;
+    showFloor(i);
+    applyFilter();
+  });
+  for (const chip of li.querySelectorAll<HTMLButtonElement>('.chip')) {
+    chip.addEventListener('click', () => {
+      activePole = activePole === chip.dataset.pole ? null : chip.dataset.pole!;
+      if (activePole) game.focusPole(activePole);
+      else game.setFloor(i);
+      refreshBuilding();
+      applyFilter();
+    });
+  }
+  etagesList.append(li);
+}
+
+function refreshBuilding(): void {
+  const presence = game.presence();
+  const liveFloors = new Set([...liveLabels.keys()].map(homeFloor));
+  for (const li of etagesList.querySelectorAll<HTMLLIElement>('li')) {
+    const i = Number(li.dataset.floor);
+    li.classList.toggle('current', i === game.floorIndex);
+    li.classList.toggle('live', liveFloors.has(i));
+    const n = presence[i];
+    li.querySelector('.presents')!.textContent = `${n} présent${n > 1 ? 's' : ''}`;
+    for (const chip of li.querySelectorAll<HTMLButtonElement>('.chip')) chip.setAttribute('aria-pressed', String(chip.dataset.pole === activePole));
+  }
+}
+
+// ---------- Recherche ----------
+
 function applyFilter(): void {
-  const active = activePole !== null || search.value.trim() !== '';
+  const query = search.value.trim() !== '';
+  const active = activePole !== null || query;
   const found = matches();
   game.setHighlight(active ? new Set(found.map((a) => a.id)) : null);
   const n = active ? found.length : agents.length;
   count.textContent = `${n} agent${n > 1 ? 's' : ''}`;
-  for (const b of nav.querySelectorAll('button')) b.setAttribute('aria-pressed', String((b.dataset.pole ?? null) === activePole));
+
+  results.hidden = !query;
+  results.innerHTML = query
+    ? found.slice(0, 8).map((a) => `<li><button type="button" data-id="${esc(a.id)}"><b>${esc(a.prenom)}</b> <span>${esc(a.id)}</span><small>${esc(floorName(game.agentFloor(a.id)))}</small></button></li>`).join('')
+      || '<li class="none">Aucun agent trouvé</li>'
+    : '';
 }
+
+results.addEventListener('click', (e) => {
+  const button = (e.target as HTMLElement).closest<HTMLButtonElement>('button[data-id]');
+  if (!button) return;
+  results.hidden = true;
+  goToAgent(button.dataset.id!);
+});
+
+// ---------- Fiche ----------
 
 function select(id: string | null): void {
   selected = id;
@@ -58,6 +142,7 @@ function select(id: string | null): void {
       <div>
         <h2>${esc(agent.prenom)}</h2>
         <p class="pole"><i style="background:${esc(pole.couleur)}"></i>${esc(pole.nom)}</p>
+        <p class="pole">Bureau : ${esc(floorName(homeFloor(agent.id)))}</p>
         <code>ecc:${esc(agent.id)}</code>
       </div>
     </div>
@@ -75,6 +160,25 @@ function select(id: string | null): void {
   fiche.querySelector('.close')!.addEventListener('click', () => select(null));
 }
 
+// ---------- Activite (panneau de droite) ----------
+
+const FEED_MAX = 60;
+const feed = $('fil');
+const missionsList = $('missions');
+let lastFeed = '';
+
+const who = (a: Agent) => `${a.prenom}, ${poleById.get(a.pole)?.nom ?? a.pole}, ${floorShort(floors[homeFloor(a.id)].etage.numero)}`;
+
+function addFeed(text: string): void {
+  if (text === lastFeed) return;
+  lastFeed = text;
+  const time = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  const li = document.createElement('li');
+  li.innerHTML = `<time>${esc(time)}</time> · ${esc(text)}`;
+  feed.prepend(li);
+  while (feed.children.length > FEED_MAX) feed.lastElementChild!.remove();
+}
+
 // Missions simulees : le chef planifie, puis chaque agent de l'equipe travaille a son tour.
 type RunStep = Step & { state: 'attente' | 'cours' | 'fini' };
 const CHEF_SECONDS = 4;
@@ -83,7 +187,6 @@ const pending: string[] = [];
 let run: { text: string; steps: RunStep[] } | null = null;
 let lastDone = '';
 const missionStatus = $('mission-status');
-const short = (s: string, n: number) => (s.length > n ? s.slice(0, n - 1) + '…' : s);
 
 // Activite reelle recue des hooks Claude Code (prioritaire sur la simulation).
 const liveLabels = new Map<string, string>();
@@ -99,15 +202,27 @@ function missionOf(id: string): string {
 
 function refreshMission(): void {
   const waiting = pending.length ? ` (${pending.length} en attente)` : '';
+  const items: string[] = [];
   if (run) {
     const i = run.steps.findIndex((s) => s.state === 'cours');
-    const who = agentById.get(run.steps[i]?.id ?? '')?.prenom ?? '';
-    missionStatus.textContent = `Étape ${i + 1}/${run.steps.length} : ${who} travaille sur « ${run.text} »${waiting}`;
+    const done = run.steps.filter((s) => s.state === 'fini').length;
+    const whoNow = agentById.get(run.steps[i]?.id ?? '')?.prenom ?? '';
+    missionStatus.textContent = `Étape ${i + 1}/${run.steps.length} : ${whoNow} travaille sur « ${run.text} »${waiting}`;
+    const percent = Math.round(((done + 0.5) / run.steps.length) * 100);
+    items.push(`<li><span>« ${esc(run.text)} »</span><small>Étape ${i + 1}/${run.steps.length} · ${esc(whoNow)}</small><div class="bar"><i style="width:${percent}%"></i></div></li>`);
   } else {
     missionStatus.textContent = lastDone ? `Mission terminée : « ${lastDone} »` : 'Aucune mission en cours.';
   }
+  for (const text of pending) items.push(`<li><span>« ${esc(text)} »</span><small>En attente</small><div class="bar"><i style="width:0"></i></div></li>`);
+  for (const [id, label] of liveLabels) {
+    const a = agentById.get(id)!;
+    items.push(`<li><span>${esc(who(a))}</span><small>En direct · ${esc(label)}</small><div class="bar live"><i></i></div></li>`);
+  }
+  missionsList.innerHTML = items.join('') || '<li class="none">Aucune mission en cours.</li>';
+
   const line = fiche.querySelector('.mission');
   if (line && selected) line.textContent = missionOf(selected);
+  refreshBuilding();
 }
 
 function advance(i: number): void {
@@ -119,6 +234,7 @@ function advance(i: number): void {
   }
   const step = run.steps[i];
   if (!step) {
+    addFeed(`Mission terminée : « ${run.text} »`);
     lastDone = run.text;
     run = null;
     startNext();
@@ -126,6 +242,8 @@ function advance(i: number): void {
   }
   step.state = 'cours';
   if (!liveLabels.has(step.id)) game.setMission(step.id, short(step.label, 36));
+  const a = agentById.get(step.id);
+  if (a) addFeed(`${who(a)} : ${step.label}`);
   refreshMission();
   setTimeout(() => advance(i + 1), (i === 0 ? CHEF_SECONDS : STEP_SECONDS) * 1000);
 }
@@ -151,32 +269,23 @@ $<HTMLFormElement>('mission').addEventListener('submit', (e) => {
   else startNext();
 });
 
-function poleButton(label: string, poleId: string | null, color: string, n: number): HTMLButtonElement {
-  const b = document.createElement('button');
-  b.type = 'button';
-  if (poleId) b.dataset.pole = poleId;
-  b.innerHTML = `<i style="background:${esc(color)}"></i>${esc(label)} <small>${n}</small>`;
-  b.addEventListener('click', () => {
-    activePole = activePole === poleId ? null : poleId;
-    if (activePole) game.focusZone(activePole);
-    applyFilter();
-  });
-  return b;
-}
-
-nav.append(poleButton('Tous', null, '#ffffff', agents.length));
-for (const p of poles) nav.append(poleButton(p.nom, p.id, p.couleur, agents.filter((a) => a.pole === p.id).length));
+// ---------- Clavier et zoom ----------
 
 search.addEventListener('input', applyFilter);
 search.addEventListener('keydown', (e) => {
   if (e.key !== 'Enter') return;
   const first = matches()[0];
   if (first) {
-    game.focusAgent(first.id);
-    select(first.id);
+    results.hidden = true;
+    goToAgent(first.id);
   }
 });
 document.addEventListener('keydown', (e) => {
+  if (e.key === 'PageUp' || e.key === 'PageDown') {
+    e.preventDefault();
+    showFloor(game.floorIndex + (e.key === 'PageUp' ? 1 : -1));
+    return;
+  }
   if (e.key !== 'Escape') return;
   if (selected) select(null);
   else if (search.value) {
@@ -187,19 +296,27 @@ document.addEventListener('keydown', (e) => {
 $('zoom-in').addEventListener('click', () => game.zoomBy(1));
 $('zoom-out').addEventListener('click', () => game.zoomBy(-1));
 
+// ---------- Direct ----------
+
 const liveStatus = $('live');
 
 function endLive(id: string): void {
   if (!liveLabels.delete(id)) return;
   game.finishMission(id);
+  const a = agentById.get(id);
+  if (a) addFeed(`${who(a)} : a terminé`);
 }
 
 connectLive({
   agent(id, active, label) {
-    if (!agentById.has(id)) return;
+    const a = agentById.get(id);
+    if (!a) return;
     if (active) {
-      liveLabels.set(id, label ?? 'travaille');
-      game.setMission(id, short(label ?? 'travaille', 36));
+      const text = label ?? 'travaille';
+      liveLabels.set(id, text);
+      game.setMission(id, short(text, 36));
+      // "réfléchit" revient après chaque outil : inutile de le répéter dans le fil.
+      if (text !== 'réfléchit') addFeed(`${who(a)} : ${text}`);
     } else {
       endLive(id);
     }
@@ -208,6 +325,7 @@ connectLive({
   session(active, label) {
     liveStatus.textContent = active ? `Claude Code : ${label}` : 'Direct : connecté';
     liveStatus.dataset.state = active ? 'busy' : 'on';
+    addFeed(active ? `Claude Code : ${label}` : 'Claude Code : session terminée');
   },
   status(connected) {
     liveStatus.textContent = connected ? 'Direct : connecté' : 'Direct : hors ligne';
@@ -223,4 +341,5 @@ connectLive({
 
 applyFilter();
 refreshMission();
+setInterval(refreshBuilding, 500);
 game.start();
