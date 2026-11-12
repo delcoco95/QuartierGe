@@ -299,12 +299,45 @@ $('zoom-out').addEventListener('click', () => game.zoomBy(-1));
 // ---------- Direct ----------
 
 const liveStatus = $('live');
+const parcours = $('parcours');
+
+// Parcours d'une vraie demande : elle arrive a la Direction, qui la confie a un service puis a un agent.
+let request: { text: string; done: boolean; route: { id: string; done: boolean }[] } | null = null;
+let chefReceiving = false;
+
+function renderRoute(): void {
+  if (!request) {
+    parcours.innerHTML = '<span class="none">Aucune demande reçue. Envoie un message dans Claude Code.</span>';
+    return;
+  }
+  const boss = agentById.get(chef);
+  const steps = request.route.map((r) => {
+    const a = agentById.get(r.id)!;
+    return `<li><b>${esc(poleById.get(a.pole)?.nom ?? a.pole)}</b> · ${esc(a.prenom)} — ${r.done ? 'terminé' : 'en cours'}</li>`;
+  });
+  parcours.innerHTML = `
+    <p>« ${esc(request.text)} »${request.done ? ' — terminée' : ''}</p>
+    <ol>
+      <li><b>Direction</b>${boss ? ` · ${esc(boss.prenom)}` : ''} — reçoit et répartit</li>
+      ${steps.join('') || (request.done ? '<li>Traitée par la Direction, sans délégation</li>' : '<li>En attente de répartition</li>')}
+    </ol>`;
+}
+
+function syncMeeting(): void {
+  const before = liveLabels.size;
+  game.setMeeting([...liveLabels.keys()]);
+  if (before === 2) addFeed('Réunion : plusieurs agents travaillent ensemble, ils se retrouvent en salle de réunion');
+}
 
 function endLive(id: string): void {
   if (!liveLabels.delete(id)) return;
   game.finishMission(id);
   const a = agentById.get(id);
   if (a) addFeed(`${who(a)} : a terminé`);
+  const step = request?.route.find((r) => r.id === id);
+  if (step) step.done = true;
+  game.setMeeting([...liveLabels.keys()]);
+  renderRoute();
 }
 
 connectLive({
@@ -313,8 +346,18 @@ connectLive({
     if (!a) return;
     if (active) {
       const text = label ?? 'travaille';
+      const arriving = !liveLabels.has(id);
       liveLabels.set(id, text);
       game.setMission(id, short(text, 36), true);
+      if (arriving) {
+        addFeed(`Direction → ${poleById.get(a.pole)?.nom ?? a.pole} → ${a.prenom}`);
+        request ??= { text: 'Demande en cours', done: false, route: [] };
+        const known = request.route.find((r) => r.id === id);
+        if (known) known.done = false;
+        else request.route.push({ id, done: false });
+        syncMeeting();
+        renderRoute();
+      }
       // "réfléchit" revient après chaque outil : inutile de le répéter dans le fil.
       if (text !== 'réfléchit') addFeed(`${who(a)} : ${text}`);
     } else {
@@ -322,10 +365,26 @@ connectLive({
     }
     refreshMission();
   },
-  session(active, label) {
+  session(active, label, prompt) {
     liveStatus.textContent = active ? `Claude Code : ${label}` : 'Direct : connecté';
     liveStatus.dataset.state = active ? 'busy' : 'on';
-    addFeed(active ? `Claude Code : ${label}` : 'Claude Code : session terminée');
+    if (prompt) {
+      // Une nouvelle demande : elle tombe d'abord chez la Direction.
+      request = { text: label, done: false, route: [] };
+      addFeed(`Demande reçue par la Direction : ${label}`);
+      if (!liveLabels.has(chef)) {
+        game.setMission(chef, short(`Reçoit : ${label}`, 36), true);
+        chefReceiving = true;
+      }
+    } else {
+      addFeed(active ? `Claude Code : ${label}` : 'Claude Code : demande terminée');
+    }
+    if (!active) {
+      if (request) request.done = true;
+      if (chefReceiving && !liveLabels.has(chef)) game.finishMission(chef);
+      chefReceiving = false;
+    }
+    renderRoute();
   },
   status(connected) {
     liveStatus.textContent = connected ? 'Direct : connecté' : 'Direct : hors ligne';
@@ -344,6 +403,7 @@ const forcedHour = new URLSearchParams(location.search).get('heure');
 if (forcedHour !== null && forcedHour !== '') game.setHour(Number(forcedHour) % 24);
 
 applyFilter();
+renderRoute();
 refreshMission();
 setInterval(refreshBuilding, 500);
 game.start();

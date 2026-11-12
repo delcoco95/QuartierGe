@@ -51,7 +51,7 @@ suite('createOffice', () => {
     const office = createOffice();
     const main = { session_id: 's1' };
     expect(office.handle({ ...main, hook_event_name: 'UserPromptSubmit', prompt: 'corrige   le bug' })).toEqual([
-      { type: 'session', active: true, label: 'corrige le bug' },
+      { type: 'session', active: true, label: 'corrige le bug', prompt: true },
     ]);
     expect(office.handle({ ...main, hook_event_name: 'PreToolUse', tool_name: 'Bash', tool_input: { command: 'npm test' } })).toEqual([
       { type: 'session', active: true, label: 'lance les tests' },

@@ -78,7 +78,8 @@ export function createOffice() {
       }
       case 'UserPromptSubmit':
         session = { active: true, label: short(String(event.prompt ?? '').replace(/\s+/g, ' ').trim(), 70) };
-        return [sessionState()];
+        // prompt: true = une nouvelle demande arrive (a distinguer d'un simple appel d'outil).
+        return [{ ...sessionState(), prompt: true }];
       case 'Stop': {
         // Filet : un SubagentStop manque ne doit pas laisser un agent bloque en mission.
         const keys = new Set();

@@ -376,6 +376,31 @@ h1 {
   }
 }
 
+#parcours {
+  padding: 7px 8px;
+  background: var(--bg);
+  border-left: 3px solid var(--live);
+}
+
+#parcours p {
+  margin: 0 0 6px;
+  overflow-wrap: anywhere;
+}
+
+#parcours ol {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+}
+
+#parcours li b {
+  color: var(--text);
+}
+
+#parcours .none {
+  color: var(--muted);
+}
+
 #fil li {
   padding: 4px 0;
   border-bottom: 1px solid var(--line);

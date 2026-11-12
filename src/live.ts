@@ -4,7 +4,8 @@ const RETRY_MS = 3000;
 
 export interface LiveHandlers {
   agent(id: string, active: boolean, label: string | null): void;
-  session(active: boolean, label: string): void;
+  /** prompt = true quand une nouvelle demande vient d'etre envoyee. */
+  session(active: boolean, label: string, prompt: boolean): void;
   status(connected: boolean): void;
 }
 
@@ -13,14 +14,14 @@ export function connectLive(handlers: LiveHandlers): void {
     const socket = new WebSocket(URL_WS);
     socket.addEventListener('open', () => handlers.status(true));
     socket.addEventListener('message', (e) => {
-      let m: { type?: string; id?: string; active?: boolean; label?: string | null };
+      let m: { type?: string; id?: string; active?: boolean; label?: string | null; prompt?: boolean };
       try {
         m = JSON.parse(String(e.data));
       } catch {
         return;
       }
       if (m.type === 'agent' && m.id) handlers.agent(m.id, Boolean(m.active), m.label ?? null);
-      else if (m.type === 'session') handlers.session(Boolean(m.active), m.label ?? '');
+      else if (m.type === 'session') handlers.session(Boolean(m.active), m.label ?? '', Boolean(m.prompt));
     });
     socket.addEventListener('close', () => {
       handlers.status(false);

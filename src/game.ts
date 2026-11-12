@@ -44,6 +44,8 @@ interface Actor {
   live: boolean;
   /** En pause sur une chaise (salle de reunion). */
   seated: boolean;
+  /** Convoque en salle de reunion avec les autres agents actifs. */
+  meet: boolean;
   wantCafe: boolean;
 }
 
@@ -82,6 +84,7 @@ export class Game {
   private readonly liftOpen: number[];
   private phase: Phase = skyPhase(new Date().getHours());
   private hourOverride: number | null = null;
+  private meetingFloor: number | null = null;
   private view = 0;
   private zoom = 2;
   private camX = 0;
@@ -110,7 +113,7 @@ export class Game {
       const actor: Actor = {
         agent, home, look: lookFor(agent.id, color), floor: home.floor,
         x: home.x, y: home.y, state: 'sit', path: [], legs: [], goal: 'sit', lift: 0, liftTo: home.floor,
-        timer: rand(2, 60), spot: null, back: false, phase: Math.random() * 10, mission: null, live: false, seated: false, wantCafe: false,
+        timer: rand(2, 60), spot: null, back: false, phase: Math.random() * 10, mission: null, live: false, seated: false, meet: false, wantCafe: false,
       };
       this.actors.push(actor);
       this.byId.set(agent.id, actor);
@@ -218,6 +221,7 @@ export class Game {
     a.mission = label;
     a.live = live;
     a.wantCafe = false;
+    if (a.meet) return;
     const headingHome = a.state === 'move' && a.goal === 'sit';
     if (a.state !== 'sit' && !headingHome) this.goTo(a, a.home.floor, a.home, 'sit', null);
   }
@@ -229,6 +233,39 @@ export class Game {
     a.mission = null;
     a.live = false;
     a.wantCafe = true;
+    if (a.meet) {
+      a.meet = false;
+      a.timer = 0;
+    }
+  }
+
+  /**
+   * Agents qui travaillent en meme temps : a partir de deux, ils se retrouvent en salle de reunion
+   * (celle de l'etage du premier). En dessous, celui qui reste regagne son bureau.
+   */
+  setMeeting(ids: string[]): void {
+    const wanted = new Set(ids.length >= 2 ? ids : []);
+    for (const a of this.actors) {
+      if (a.meet && !wanted.has(a.agent.id)) {
+        a.meet = false;
+        if (a.mission) this.goTo(a, a.home.floor, a.home, 'sit', null);
+      }
+    }
+    if (wanted.size === 0) {
+      this.meetingFloor = null;
+      return;
+    }
+    this.meetingFloor ??= this.byId.get(ids[0])?.home.floor ?? 0;
+    const index = this.meetingFloor;
+    const floor = this.building.floors[index];
+    for (const id of wanted) {
+      const a = this.byId.get(id);
+      if (!a || a.meet) continue;
+      const seat = floor.spots.map((s, i) => ({ s, key: `${index}:${i}` })).find((c) => c.s.seat && !this.takenSpots.has(c.key));
+      if (!seat) continue;
+      a.meet = true;
+      this.goTo(a, index, seat.s, 'idle', seat.key);
+    }
   }
 
   /** Force l'heure du ciel (0-23) pour tester le rendu ; null revient a l'heure reelle. */
@@ -327,6 +364,7 @@ export class Game {
       }
 
       if (a.state === 'idle') {
+        if (a.meet) continue;
         a.timer -= dt;
         if (a.timer <= 0) this.goTo(a, a.home.floor, a.home, 'sit', null);
         continue;
