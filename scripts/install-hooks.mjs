@@ -1,8 +1,9 @@
 // Ajoute (ou retire avec --remove) les hooks Quartier General dans ~/.claude/settings.json.
 // Les hooks deja presents ne sont jamais modifies : on ajoute un groupe a la fin de chaque evenement.
-import { copyFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const URL_HOOK = 'http://127.0.0.1:4747/event';
 const EVENTS = ['UserPromptSubmit', 'PreToolUse', 'PostToolUse', 'SubagentStart', 'SubagentStop', 'Stop'];
@@ -28,6 +29,20 @@ for (const event of EVENTS) {
     settings.hooks[event] = [...groups, { matcher: '', hooks: [{ type: 'http', url: URL_HOOK, timeout: 2 }] }];
     changed.push(event);
   }
+}
+
+// La commande /qg : copiee a chaque lancement pour suivre les mises a jour du depot.
+const commandSource = join(dirname(fileURLToPath(import.meta.url)), '..', 'claude', 'commands', 'qg.md');
+const commandTarget = join(dirname(file), 'commands', 'qg.md');
+if (remove) {
+  if (existsSync(commandTarget)) {
+    rmSync(commandTarget);
+    console.log(`Commande /qg retirée : ${commandTarget}`);
+  }
+} else {
+  mkdirSync(dirname(commandTarget), { recursive: true });
+  copyFileSync(commandSource, commandTarget);
+  console.log(`Commande /qg installée : ${commandTarget}`);
 }
 
 if (changed.length === 0) {

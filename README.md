@@ -37,4 +37,14 @@ Fonctionnement :
 2. `server/server.mjs` écoute sur `127.0.0.1:4747`, reçoit les événements (`POST /event`) et les pousse au navigateur (`ws://127.0.0.1:4747/ws`). Il n'accepte que les pages servies depuis cette machine. `GET /health` donne le nombre d'événements reçus.
 3. Quand un sous-agent ECC démarre, son personnage regagne son bureau et sa bulle affiche ce qu'il fait (« lit auth.ts », « lance les tests »). Quand il finit, il va au coin café.
 
+## La commande /qg
+
+`scripts/install-hooks.mjs` installe aussi la commande `/qg` dans `~/.claude/commands/qg.md` (source : `claude/commands/qg.md`). Dans n'importe quelle session Claude Code :
+
+```
+/qg ajoute une page de connexion et teste-la
+```
+
+La Direction (`planner`) découpe la demande, la répartit aux agents ECC adaptés, puis fait rejouer tests et relecture : au moins deux passes complètes, la dernière entièrement verte, au plus trois tours de correction. Chaque agent lancé apparaît dans le bureau ; ceux qui travaillent en même temps se retrouvent en salle de réunion. `npm run hooks:remove` retire la commande.
+
 Si le serveur est éteint, les hooks échouent sans bloquer Claude Code. Les sessions Claude Code déjà ouvertes peuvent devoir être redémarrées pour prendre les nouveaux hooks en compte.
