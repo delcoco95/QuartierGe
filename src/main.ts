@@ -1,5 +1,6 @@
 import { loadAgents, type Agent } from './data';
 import { Game } from './game';
+import { connectLive } from './live';
 import { buildMap } from './map';
 import { fold, planMission, type Step } from './missions';
 import { characterSprite, lookFor } from './sprites';
@@ -84,7 +85,12 @@ let lastDone = '';
 const missionStatus = $('mission-status');
 const short = (s: string, n: number) => (s.length > n ? s.slice(0, n - 1) + '…' : s);
 
+// Activite reelle recue des hooks Claude Code (prioritaire sur la simulation).
+const liveLabels = new Map<string, string>();
+
 function missionOf(id: string): string {
+  const live = liveLabels.get(id);
+  if (live) return `En direct : ${live}`;
   const step = run?.steps.find((s) => s.id === id);
   if (!step) return 'Aucune mission en cours.';
   if (step.state === 'cours') return step.label;
@@ -109,7 +115,7 @@ function advance(i: number): void {
   const previous = run.steps[i - 1];
   if (previous) {
     previous.state = 'fini';
-    game.setMission(previous.id, null);
+    if (!liveLabels.has(previous.id)) game.finishMission(previous.id);
   }
   const step = run.steps[i];
   if (!step) {
@@ -119,7 +125,7 @@ function advance(i: number): void {
     return;
   }
   step.state = 'cours';
-  game.setMission(step.id, short(step.label, 36));
+  if (!liveLabels.has(step.id)) game.setMission(step.id, short(step.label, 36));
   refreshMission();
   setTimeout(() => advance(i + 1), (i === 0 ? CHEF_SECONDS : STEP_SECONDS) * 1000);
 }
@@ -181,10 +187,39 @@ document.addEventListener('keydown', (e) => {
 $('zoom-in').addEventListener('click', () => game.zoomBy(1));
 $('zoom-out').addEventListener('click', () => game.zoomBy(-1));
 
-(window as unknown as Record<string, unknown>).quartierGeneral = {
-  version,
-  setMission: (id: string, label: string | null) => game.setMission(id.replace(/^ecc:/, ''), label),
-};
+const liveStatus = $('live');
+
+function endLive(id: string): void {
+  if (!liveLabels.delete(id)) return;
+  game.finishMission(id);
+}
+
+connectLive({
+  agent(id, active, label) {
+    if (!agentById.has(id)) return;
+    if (active) {
+      liveLabels.set(id, label ?? 'travaille');
+      game.setMission(id, short(label ?? 'travaille', 36));
+    } else {
+      endLive(id);
+    }
+    refreshMission();
+  },
+  session(active, label) {
+    liveStatus.textContent = active ? `Claude Code : ${label}` : 'Direct : connecté';
+    liveStatus.dataset.state = active ? 'busy' : 'on';
+  },
+  status(connected) {
+    liveStatus.textContent = connected ? 'Direct : connecté' : 'Direct : hors ligne';
+    liveStatus.dataset.state = connected ? 'on' : 'off';
+    if (!connected) {
+      for (const id of [...liveLabels.keys()]) endLive(id);
+      refreshMission();
+    }
+  },
+});
+
+(window as unknown as Record<string, unknown>).quartierGeneral = { version };
 
 applyFilter();
 refreshMission();

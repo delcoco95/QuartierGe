@@ -24,6 +24,7 @@ interface Actor {
   back: boolean;
   phase: number;
   mission: string | null;
+  wantCafe: boolean;
 }
 
 interface Drawable {
@@ -71,7 +72,7 @@ export class Game {
       const actor: Actor = {
         agent, home, look: lookFor(agent.id, color),
         x: home.x, y: home.y, state: 'sit', path: [], timer: rand(2, 60), spot: -1,
-        back: false, phase: Math.random() * 10, mission: null,
+        back: false, phase: Math.random() * 10, mission: null, wantCafe: false,
       };
       this.actors.push(actor);
       this.byId.set(agent.id, actor);
@@ -127,12 +128,36 @@ export class Game {
     this.zoomAt(this.canvas.width / 2, this.canvas.height / 2, delta);
   }
 
-  /** Point d'entree de la V2 : impose une mission a un agent (null pour la terminer). */
-  setMission(id: string, label: string | null): void {
+  /** Donne une mission a un agent : il regagne son bureau et sa bulle affiche le libelle. */
+  setMission(id: string, label: string): void {
     const a = this.byId.get(id);
     if (!a) return;
     a.mission = label;
-    if (label && (a.state === 'go' || a.state === 'idle')) this.sendHome(a);
+    a.wantCafe = false;
+    if (a.state === 'go' || a.state === 'idle') this.sendHome(a);
+  }
+
+  /** Fin de mission : l'agent part au cafe des qu'il est a son poste. */
+  finishMission(id: string): void {
+    const a = this.byId.get(id);
+    if (!a || !a.mission) return;
+    a.mission = null;
+    a.wantCafe = true;
+  }
+
+  private startTrip(a: Actor, preferred: number[]): boolean {
+    const isFree = (i: number) => !this.takenSpots.has(i);
+    let pool = preferred.filter(isFree);
+    if (pool.length === 0) pool = this.map.spots.map((_, i) => i).filter(isFree);
+    if (pool.length === 0) return false;
+    const spot = pool[Math.floor(Math.random() * pool.length)];
+    const path = findPath(this.map, a.home, this.map.spots[spot], a.agent.id);
+    if (!path) return false;
+    a.path = path;
+    a.spot = spot;
+    a.state = 'go';
+    this.takenSpots.add(spot);
+    return true;
   }
 
   private scale(): number {
@@ -238,20 +263,16 @@ export class Game {
 
     for (const a of this.actors) {
       if (a.state === 'sit') {
+        if (a.mission) continue;
+        if (a.wantCafe) {
+          a.wantCafe = false;
+          if (this.startTrip(a, this.map.cafeSpots)) away++;
+          continue;
+        }
         a.timer -= dt;
-        if (a.timer > 0 || a.mission) continue;
+        if (a.timer > 0) continue;
         a.timer = rand(25, 90);
-        if (away >= MAX_AWAY) continue;
-        const free = this.map.spots.map((_, i) => i).filter((i) => !this.takenSpots.has(i));
-        if (free.length === 0) continue;
-        const spot = free[Math.floor(Math.random() * free.length)];
-        const path = findPath(this.map, a.home, this.map.spots[spot], a.agent.id);
-        if (!path) continue;
-        a.path = path;
-        a.spot = spot;
-        a.state = 'go';
-        this.takenSpots.add(spot);
-        away++;
+        if (away < MAX_AWAY && this.startTrip(a, [])) away++;
         continue;
       }
 

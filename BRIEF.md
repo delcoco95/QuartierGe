@@ -214,9 +214,9 @@ Règle : un agent présent dans le plugin mais absent de `roster.json` apparaît
 - Champ de recherche : prénom, identifiant, rôle ou outil. Les résultats sont surlignés, les autres agents sont atténués.
 - Boutons de pôle : centrent la caméra sur la zone et surlignent ses agents.
 
-## 10. V2 — activité en direct (esquisse)
+## 10. V2 — activité en direct (réalisée)
 
-Quand Claude Code lance réellement un sous-agent ECC, son personnage passe à l'état « en mission » (animation distincte, bulle avec la tâche en cours), puis revient au repos à la fin. Mécanisme envisagé : des hooks Claude Code qui notifient un petit serveur local, lequel pousse les événements à la page. Le mécanisme exact est à valider au début de la V2. La V1 doit seulement prévoir que l'état d'un personnage puisse être imposé de l'extérieur.
+Quand Claude Code lance réellement un sous-agent ECC, son personnage regagne son bureau et sa bulle affiche ce qu'il fait ; quand il finit, il va au coin café. Mécanisme : des hooks HTTP Claude Code (`UserPromptSubmit`, `PreToolUse`, `PostToolUse`, `SubagentStart`, `SubagentStop`, `Stop`) notifient un serveur Node local (`127.0.0.1:4747`), qui pousse les événements à la page en WebSocket. L'en-tête de la page indique l'état de la connexion et ce que fait la session principale. Détails dans le README.
 
 ## 11. Critères d'acceptation de la V1
 

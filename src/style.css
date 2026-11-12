@@ -69,8 +69,26 @@ button:focus-visible {
   white-space: nowrap;
 }
 
+#live {
+  flex: 1;
+  min-width: 0;
+  text-align: right;
+  font-size: 12px;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#live[data-state="on"] {
+  color: #5fe08a;
+}
+
+#live[data-state="busy"] {
+  color: var(--accent);
+}
+
 #zoom {
-  margin-left: auto;
   display: flex;
   gap: 4px;
 }
